@@ -2,6 +2,15 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Safe area for iOS */
+:root {
+  --safe-area-inset-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+.pb-safe {
+  padding-bottom: max(0.5rem, var(--safe-area-inset-bottom));
+}
+
 /* Canvas++ Design System - Charcoal Glass v2 (Luxury) */
 
 @layer base {

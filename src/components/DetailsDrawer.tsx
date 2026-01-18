@@ -7,6 +7,7 @@ import { StatusBadge } from "./StatusBadge";
 import { CoursePill } from "./CoursePill";
 import { Button } from "@/components/ui/button";
 import { useSettings } from "@/hooks/use-settings";
+import { useToastActions } from "@/hooks/use-toast-actions";
 import {
   Sheet,
   SheetContent,
@@ -22,12 +23,19 @@ interface DetailsDrawerProps {
 
 export function DetailsDrawer({ assignment, open, onClose }: DetailsDrawerProps) {
   const { isPinned, togglePinAssignment } = useSettings();
+  const { showPinned } = useToastActions();
   
   if (!assignment) return null;
 
   const dueDate = new Date(assignment.due_at);
   const isOverdue = isPast(dueDate) && assignment.submission_state !== "submitted" && assignment.submission_state !== "graded";
   const pinned = isPinned(assignment.id);
+
+  const handlePin = () => {
+    const newPinned = !pinned;
+    togglePinAssignment(assignment.id);
+    showPinned(newPinned);
+  };
 
   const formatDueDate = () => {
     if (isToday(dueDate)) {
@@ -131,7 +139,7 @@ export function DetailsDrawer({ assignment, open, onClose }: DetailsDrawerProps)
             <Button
               variant="outline"
               size="sm"
-              onClick={() => togglePinAssignment(assignment.id)}
+              onClick={handlePin}
               className={cn(
                 "flex-shrink-0",
                 pinned && "bg-primary/10 border-primary/30 text-primary"
