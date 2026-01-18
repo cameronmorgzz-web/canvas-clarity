@@ -414,7 +414,8 @@
   }
 
   .segmented-control-item[data-active="true"] {
-    @apply bg-card text-foreground-primary;
+    @apply bg-card;
+    color: hsl(var(--foreground-primary));
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
   }
 
@@ -523,12 +524,4 @@
     color: hsl(var(--foreground));
   }
 
-  /* Focus mode utility */
-  .focus-mode-active .sidebar-nav {
-    @apply opacity-40;
-  }
-
-  .focus-mode-active .main-content {
-    @apply max-w-2xl mx-auto;
-  }
 }

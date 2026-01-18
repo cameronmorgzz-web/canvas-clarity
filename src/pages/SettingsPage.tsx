@@ -1,7 +1,18 @@
-import { useSettings } from "@/hooks/use-settings";
+import { motion } from "framer-motion";
+import { useSettings, DensityMode } from "@/hooks/use-settings";
 import { useQuery } from "@tanstack/react-query";
 import { checkHealth, triggerRefresh } from "@/lib/api";
-import { CheckCircle2, XCircle, RefreshCw, Clock, Eye, Megaphone } from "lucide-react";
+import { 
+  CheckCircle2, 
+  XCircle, 
+  RefreshCw, 
+  Clock, 
+  Eye, 
+  Megaphone, 
+  Rows3, 
+  LayoutGrid,
+  Keyboard
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
@@ -29,7 +40,9 @@ export default function SettingsPage() {
     showGrades, 
     setShowGrades,
     showAnnouncements,
-    setShowAnnouncements
+    setShowAnnouncements,
+    density,
+    setDensity,
   } = useSettings();
 
   const [isForceRefreshing, setIsForceRefreshing] = useState(false);
@@ -50,49 +63,69 @@ export default function SettingsPage() {
   };
 
   return (
-    <div className="max-w-2xl mx-auto space-y-8">
+    <div className="max-w-2xl mx-auto space-y-6">
       {/* Header */}
-      <div>
-        <h1 className="text-3xl font-bold text-primary-content mb-2">Settings</h1>
-        <p className="text-secondary-content">Customize your Canvas++ experience.</p>
-      </div>
+      <motion.div
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.28 }}
+      >
+        <h1 className="text-3xl font-bold text-foreground mb-1 tracking-tight">Settings</h1>
+        <p className="text-muted-foreground">Customize your Canvas++ experience.</p>
+      </motion.div>
 
       {/* Connection Status */}
-      <section className="card-matte p-6 space-y-4">
-        <h2 className="text-lg font-semibold text-primary-content">Connection Status</h2>
+      <motion.section 
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.05, duration: 0.28 }}
+        className="card-matte p-5 space-y-4"
+      >
+        <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">Connection</h2>
         
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             {healthLoading ? (
               <div className="w-5 h-5 rounded-full bg-muted animate-pulse" />
             ) : health?.ok ? (
-              <CheckCircle2 className="w-5 h-5 text-status-submitted" />
+              <div className="w-9 h-9 rounded-lg bg-status-submitted-bg flex items-center justify-center">
+                <CheckCircle2 className="w-4 h-4 text-status-submitted" />
+              </div>
             ) : (
-              <XCircle className="w-5 h-5 text-status-overdue" />
+              <div className="w-9 h-9 rounded-lg bg-status-overdue-bg flex items-center justify-center">
+                <XCircle className="w-4 h-4 text-status-overdue" />
+              </div>
             )}
             <div>
-              <p className="font-medium text-primary-content">Backend API</p>
-              <p className="text-sm text-muted-foreground">
-                {healthLoading ? "Checking..." : health?.ok ? "Connected" : "Disconnected (using mock data)"}
+              <p className="font-medium text-foreground text-sm">Backend API</p>
+              <p className="text-xs text-muted-foreground">
+                {healthLoading ? "Checking..." : health?.ok ? "Connected" : "Using mock data"}
               </p>
             </div>
           </div>
         </div>
-      </section>
+      </motion.section>
 
-      {/* Refresh Settings */}
-      <section className="card-matte p-6 space-y-6">
-        <h2 className="text-lg font-semibold text-primary-content">Data Refresh</h2>
+      {/* Data Refresh */}
+      <motion.section 
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.1, duration: 0.28 }}
+        className="card-matte p-5 space-y-5"
+      >
+        <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">Data Refresh</h2>
         
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <Clock className="w-5 h-5 text-muted-foreground" />
+            <div className="w-9 h-9 rounded-lg bg-muted/50 flex items-center justify-center">
+              <Clock className="w-4 h-4 text-muted-foreground" />
+            </div>
             <div>
-              <Label htmlFor="refresh-interval" className="font-medium text-primary-content">
+              <Label htmlFor="refresh-interval" className="font-medium text-foreground text-sm">
                 Auto-refresh interval
               </Label>
-              <p className="text-sm text-muted-foreground">
-                How often to check for new data
+              <p className="text-xs text-muted-foreground">
+                How often to sync data
               </p>
             </div>
           </div>
@@ -100,7 +133,7 @@ export default function SettingsPage() {
             value={String(refreshInterval)} 
             onValueChange={(v) => setRefreshInterval(Number(v))}
           >
-            <SelectTrigger className="w-32 bg-muted/50 border-border-subtle">
+            <SelectTrigger className="w-28 h-8 text-xs bg-muted/50 border-border-subtle">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -113,49 +146,100 @@ export default function SettingsPage() {
           </Select>
         </div>
 
-        <div className="flex items-center justify-between pt-4 border-t border-border">
+        <div className="section-divider" />
+
+        <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <RefreshCw className="w-5 h-5 text-muted-foreground" />
+            <div className="w-9 h-9 rounded-lg bg-muted/50 flex items-center justify-center">
+              <RefreshCw className="w-4 h-4 text-muted-foreground" />
+            </div>
             <div>
-              <p className="font-medium text-primary-content">Force Refresh</p>
-              <p className="text-sm text-muted-foreground">
+              <p className="font-medium text-foreground text-sm">Force Refresh</p>
+              <p className="text-xs text-muted-foreground">
                 Manually sync all data now
               </p>
             </div>
           </div>
           <Button
             variant="outline"
+            size="sm"
             onClick={handleForceRefresh}
             disabled={isForceRefreshing}
-            className="btn-press"
+            className="btn-press h-8 text-xs"
           >
             {isForceRefreshing ? (
               <>
-                <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
-                Refreshing...
+                <RefreshCw className="w-3.5 h-3.5 mr-1.5 animate-spin" />
+                Syncing...
               </>
             ) : (
               <>
-                <RefreshCw className="w-4 h-4 mr-2" />
-                Refresh Now
+                <RefreshCw className="w-3.5 h-3.5 mr-1.5" />
+                Refresh
               </>
             )}
           </Button>
         </div>
-      </section>
+      </motion.section>
 
       {/* Display Settings */}
-      <section className="card-matte p-6 space-y-6">
-        <h2 className="text-lg font-semibold text-primary-content">Display</h2>
+      <motion.section 
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.15, duration: 0.28 }}
+        className="card-matte p-5 space-y-5"
+      >
+        <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">Display</h2>
+        
+        {/* Density */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-lg bg-muted/50 flex items-center justify-center">
+              {density === "compact" ? (
+                <Rows3 className="w-4 h-4 text-muted-foreground" />
+              ) : (
+                <LayoutGrid className="w-4 h-4 text-muted-foreground" />
+              )}
+            </div>
+            <div>
+              <Label className="font-medium text-foreground text-sm">
+                List density
+              </Label>
+              <p className="text-xs text-muted-foreground">
+                Comfort for spacious, Compact for power users
+              </p>
+            </div>
+          </div>
+          <div className="segmented-control">
+            <button
+              onClick={() => setDensity("comfort")}
+              data-active={density === "comfort"}
+              className="segmented-control-item text-xs"
+            >
+              Comfort
+            </button>
+            <button
+              onClick={() => setDensity("compact")}
+              data-active={density === "compact"}
+              className="segmented-control-item text-xs"
+            >
+              Compact
+            </button>
+          </div>
+        </div>
+
+        <div className="section-divider" />
         
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <Eye className="w-5 h-5 text-muted-foreground" />
+            <div className="w-9 h-9 rounded-lg bg-muted/50 flex items-center justify-center">
+              <Eye className="w-4 h-4 text-muted-foreground" />
+            </div>
             <div>
-              <Label htmlFor="show-grades" className="font-medium text-primary-content">
+              <Label htmlFor="show-grades" className="font-medium text-foreground text-sm">
                 Show grades/points
               </Label>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-xs text-muted-foreground">
                 Display point values on assignments
               </p>
             </div>
@@ -167,15 +251,19 @@ export default function SettingsPage() {
           />
         </div>
 
-        <div className="flex items-center justify-between pt-4 border-t border-border">
+        <div className="section-divider" />
+
+        <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <Megaphone className="w-5 h-5 text-muted-foreground" />
+            <div className="w-9 h-9 rounded-lg bg-muted/50 flex items-center justify-center">
+              <Megaphone className="w-4 h-4 text-muted-foreground" />
+            </div>
             <div>
-              <Label htmlFor="show-announcements" className="font-medium text-primary-content">
+              <Label htmlFor="show-announcements" className="font-medium text-foreground text-sm">
                 Show announcements
               </Label>
-              <p className="text-sm text-muted-foreground">
-                Display announcements section on Home
+              <p className="text-xs text-muted-foreground">
+                Display announcements on Home
               </p>
             </div>
           </div>
@@ -185,14 +273,23 @@ export default function SettingsPage() {
             onCheckedChange={setShowAnnouncements}
           />
         </div>
-      </section>
+      </motion.section>
 
       {/* Keyboard Shortcuts */}
-      <section className="card-matte p-6 space-y-4">
-        <h2 className="text-lg font-semibold text-primary-content">Keyboard Shortcuts</h2>
+      <motion.section 
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.2, duration: 0.28 }}
+        className="card-matte p-5 space-y-4"
+      >
+        <div className="flex items-center gap-2">
+          <Keyboard className="w-4 h-4 text-muted-foreground" />
+          <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">Keyboard Shortcuts</h2>
+        </div>
         
-        <div className="grid gap-3 text-sm">
+        <div className="grid gap-2 text-sm">
           {[
+            { keys: "⌘ K", description: "Open command palette" },
             { keys: "/", description: "Focus search" },
             { keys: "G H", description: "Go to Home" },
             { keys: "G A", description: "Go to Assignments" },
@@ -201,15 +298,15 @@ export default function SettingsPage() {
             { keys: "G S", description: "Go to Settings" },
             { keys: "Esc", description: "Close drawer/modal" },
           ].map(({ keys, description }) => (
-            <div key={keys} className="flex items-center justify-between">
-              <span className="text-secondary-content">{description}</span>
-              <kbd className="inline-flex items-center gap-1 px-2 py-1 rounded border border-border bg-muted font-mono text-xs text-muted-foreground">
+            <div key={keys} className="flex items-center justify-between py-1">
+              <span className="text-muted-foreground text-xs">{description}</span>
+              <kbd className="inline-flex items-center gap-1 px-2 py-1 rounded-md border border-border bg-muted/50 font-mono text-2xs text-muted-foreground">
                 {keys}
               </kbd>
             </div>
           ))}
         </div>
-      </section>
+      </motion.section>
     </div>
   );
 }

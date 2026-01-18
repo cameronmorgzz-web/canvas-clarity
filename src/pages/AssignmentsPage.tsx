@@ -1,6 +1,7 @@
 import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "react-router-dom";
+import { motion } from "framer-motion";
 import { Search, Filter, SortAsc } from "lucide-react";
 import { fetchAssignments, fetchCourses } from "@/lib/api";
 import { useSettings } from "@/hooks/use-settings";
@@ -11,7 +12,6 @@ import { EmptyStateCard } from "@/components/EmptyStateCard";
 import { ErrorBanner } from "@/components/ErrorBanner";
 import { SkeletonList } from "@/components/SkeletonCard";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import {
   Select,
   SelectContent,
@@ -27,7 +27,7 @@ type SortOption = "due" | "course" | "points";
 
 export default function AssignmentsPage() {
   const { refreshInterval, showGrades } = useSettings();
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams] = useSearchParams();
   
   const [selectedAssignment, setSelectedAssignment] = useState<Assignment | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -131,76 +131,85 @@ export default function AssignmentsPage() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
+    <div className="max-w-4xl mx-auto space-y-5">
       {/* Page Header */}
-      <div>
-        <h1 className="text-3xl font-bold text-primary-content mb-2">Assignments</h1>
-        <p className="text-secondary-content">All your assignments in one place.</p>
-      </div>
+      <motion.div
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.28 }}
+      >
+        <h1 className="text-3xl font-bold text-foreground mb-1 tracking-tight">Assignments</h1>
+        <p className="text-muted-foreground">All your assignments in one place.</p>
+      </motion.div>
 
       {/* Filters Bar */}
-      <div className="card-matte p-4 space-y-4 sticky top-20 z-20">
+      <motion.div 
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.05, duration: 0.28 }}
+        className="card-matte p-4 space-y-3 sticky top-14 z-20"
+      >
         {/* Search */}
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input
             type="search"
             placeholder="Search assignments..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="pl-10 bg-muted/50 border-border-subtle"
+            className="pl-10 h-9 input-premium text-sm"
           />
         </div>
 
         {/* Filter Row */}
-        <div className="flex flex-wrap items-center gap-3">
-          <div className="flex items-center gap-2">
-            <Filter className="w-4 h-4 text-muted-foreground" />
-            
-            <Select value={statusFilter} onValueChange={(v) => setStatusFilter(v as StatusFilter)}>
-              <SelectTrigger className="w-36 bg-muted/50 border-border-subtle">
-                <SelectValue placeholder="Status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Status</SelectItem>
-                <SelectItem value="not_submitted">Not Submitted</SelectItem>
-                <SelectItem value="submitted">Submitted</SelectItem>
-                <SelectItem value="missing">Missing</SelectItem>
-                <SelectItem value="graded">Graded</SelectItem>
-              </SelectContent>
-            </Select>
-
-            <Select value={dueRange} onValueChange={(v) => setDueRange(v as DueRange)}>
-              <SelectTrigger className="w-36 bg-muted/50 border-border-subtle">
-                <SelectValue placeholder="Due" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="today">Today</SelectItem>
-                <SelectItem value="week">This Week</SelectItem>
-                <SelectItem value="two_weeks">Next 14 Days</SelectItem>
-                <SelectItem value="all">All Time</SelectItem>
-              </SelectContent>
-            </Select>
-
-            <Select value={courseFilter} onValueChange={setCourseFilter}>
-              <SelectTrigger className="w-40 bg-muted/50 border-border-subtle">
-                <SelectValue placeholder="Course" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Courses</SelectItem>
-                {courses?.map((course) => (
-                  <SelectItem key={course.id} value={course.id}>
-                    {course.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+        <div className="flex flex-wrap items-center gap-2">
+          <div className="flex items-center gap-1.5 text-muted-foreground">
+            <Filter className="w-3.5 h-3.5" />
           </div>
+          
+          <Select value={statusFilter} onValueChange={(v) => setStatusFilter(v as StatusFilter)}>
+            <SelectTrigger className="w-32 h-8 text-xs bg-muted/50 border-border-subtle">
+              <SelectValue placeholder="Status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Status</SelectItem>
+              <SelectItem value="not_submitted">Not Submitted</SelectItem>
+              <SelectItem value="submitted">Submitted</SelectItem>
+              <SelectItem value="missing">Missing</SelectItem>
+              <SelectItem value="graded">Graded</SelectItem>
+            </SelectContent>
+          </Select>
 
-          <div className="flex items-center gap-2 ml-auto">
-            <SortAsc className="w-4 h-4 text-muted-foreground" />
+          <Select value={dueRange} onValueChange={(v) => setDueRange(v as DueRange)}>
+            <SelectTrigger className="w-32 h-8 text-xs bg-muted/50 border-border-subtle">
+              <SelectValue placeholder="Due" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="today">Today</SelectItem>
+              <SelectItem value="week">This Week</SelectItem>
+              <SelectItem value="two_weeks">14 Days</SelectItem>
+              <SelectItem value="all">All Time</SelectItem>
+            </SelectContent>
+          </Select>
+
+          <Select value={courseFilter} onValueChange={setCourseFilter}>
+            <SelectTrigger className="w-36 h-8 text-xs bg-muted/50 border-border-subtle">
+              <SelectValue placeholder="Course" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Courses</SelectItem>
+              {courses?.map((course) => (
+                <SelectItem key={course.id} value={course.id}>
+                  {course.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          <div className="flex items-center gap-1.5 ml-auto text-muted-foreground">
+            <SortAsc className="w-3.5 h-3.5" />
             <Select value={sortBy} onValueChange={(v) => setSortBy(v as SortOption)}>
-              <SelectTrigger className="w-28 bg-muted/50 border-border-subtle">
+              <SelectTrigger className="w-24 h-8 text-xs bg-muted/50 border-border-subtle">
                 <SelectValue placeholder="Sort" />
               </SelectTrigger>
               <SelectContent>
@@ -211,7 +220,7 @@ export default function AssignmentsPage() {
             </Select>
           </div>
         </div>
-      </div>
+      </motion.div>
 
       {/* Error */}
       {error && (
@@ -222,12 +231,17 @@ export default function AssignmentsPage() {
       )}
 
       {/* Results */}
-      <div className="space-y-3">
+      <motion.div 
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.1, duration: 0.28 }}
+        className="space-y-2"
+      >
         {isLoading ? (
           <SkeletonList count={6} />
         ) : filteredAssignments.length > 0 ? (
           <>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-xs text-muted-foreground mb-3">
               {filteredAssignments.length} assignment{filteredAssignments.length !== 1 ? "s" : ""}
             </p>
             {filteredAssignments.map((assignment) => (
@@ -246,7 +260,7 @@ export default function AssignmentsPage() {
             description="Try adjusting your filters"
           />
         )}
-      </div>
+      </motion.div>
 
       {/* Details Drawer */}
       <DetailsDrawer
