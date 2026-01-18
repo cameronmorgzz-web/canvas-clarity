@@ -1,11 +1,13 @@
 import { useState, useCallback, useEffect } from "react";
 import { Outlet, useLocation } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
+import { AnimatePresence, motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { SidebarNav } from "@/components/SidebarNav";
 import { TopBar } from "@/components/TopBar";
 import { useKeyboardShortcuts } from "@/hooks/use-keyboard-shortcuts";
 import { triggerRefresh } from "@/lib/api";
+import { iosEase } from "@/lib/animations";
 
 export function AppShell() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -29,7 +31,6 @@ export function AppShell() {
     }
   }, [queryClient]);
 
-  // Update last updated time when queries complete
   useEffect(() => {
     const unsubscribe = queryClient.getQueryCache().subscribe((event) => {
       if (event?.type === "updated" && event.query.state.status === "success") {
@@ -46,10 +47,12 @@ export function AppShell() {
         onToggle={() => setSidebarCollapsed(!sidebarCollapsed)} 
       />
       
-      <div className={cn(
-        "flex-1 flex flex-col transition-all duration-300",
-        sidebarCollapsed ? "ml-16" : "ml-60"
-      )}>
+      <motion.div 
+        className="flex-1 flex flex-col"
+        initial={false}
+        animate={{ marginLeft: sidebarCollapsed ? 64 : 240 }}
+        transition={{ type: "spring", stiffness: 400, damping: 30 }}
+      >
         <TopBar 
           lastUpdated={lastUpdated}
           isRefreshing={isRefreshing}
@@ -57,11 +60,19 @@ export function AppShell() {
         />
         
         <main className="flex-1 p-6 overflow-auto">
-          <div className="animate-fade-in">
-            <Outlet />
-          </div>
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={location.pathname}
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.3, ease: iosEase }}
+            >
+              <Outlet />
+            </motion.div>
+          </AnimatePresence>
         </main>
-      </div>
+      </motion.div>
     </div>
   );
 }

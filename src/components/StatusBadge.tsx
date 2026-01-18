@@ -1,3 +1,4 @@
+import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 
 interface StatusBadgeProps {
@@ -28,21 +29,39 @@ export function StatusBadge({ status, submissionState, className }: StatusBadgeP
       case "due_soon":
         return { label: "Due Soon", variant: "status-soon" };
       default:
-        return { label: "Upcoming", variant: "bg-muted text-muted-foreground" };
+        return { label: "Upcoming", variant: "bg-muted/60 text-muted-foreground" };
     }
   };
 
   const { label, variant } = getStatusConfig();
+  const isUrgent = status === "overdue" || submissionState === "missing";
 
   return (
-    <span
+    <motion.span
+      initial={{ opacity: 0, scale: 0.9 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ type: "spring", stiffness: 400, damping: 25 }}
       className={cn(
-        "inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium",
+        "inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-semibold",
+        "transition-all duration-200",
         variant,
         className
       )}
     >
+      {isUrgent && (
+        <motion.span
+          className="w-1.5 h-1.5 rounded-full bg-current mr-1.5"
+          animate={{
+            opacity: [1, 0.4, 1],
+          }}
+          transition={{
+            duration: 1.5,
+            repeat: Infinity,
+            ease: "easeInOut",
+          }}
+        />
+      )}
       {label}
-    </span>
+    </motion.span>
   );
 }
