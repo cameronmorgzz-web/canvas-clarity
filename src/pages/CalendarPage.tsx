@@ -1,15 +1,16 @@
 import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, addMonths, subMonths, isToday } from "date-fns";
-import { ChevronLeft, ChevronRight, List, Grid } from "lucide-react";
-import { fetchCalendar, fetchUpcoming } from "@/lib/api";
+import { motion } from "framer-motion";
+import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, addMonths, subMonths, isToday } from "date-fns";
+import { ChevronLeft, ChevronRight, List, Grid3X3 } from "lucide-react";
+import { fetchUpcoming } from "@/lib/api";
 import { useSettings } from "@/hooks/use-settings";
-import type { CalendarEvent, Assignment } from "@/types/canvas";
+import type { Assignment } from "@/types/canvas";
 import { AssignmentCardRow } from "@/components/AssignmentCardRow";
 import { DetailsDrawer } from "@/components/DetailsDrawer";
 import { EmptyStateCard } from "@/components/EmptyStateCard";
 import { ErrorBanner } from "@/components/ErrorBanner";
-import { SkeletonList, SkeletonCard } from "@/components/SkeletonCard";
+import { SkeletonList } from "@/components/SkeletonCard";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -78,42 +79,39 @@ export default function CalendarPage() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
+    <div className="max-w-4xl mx-auto space-y-5">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <motion.div 
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.28 }}
+        className="flex items-center justify-between gap-4"
+      >
         <div>
-          <h1 className="text-3xl font-bold text-primary-content mb-2">Calendar</h1>
-          <p className="text-secondary-content">Your schedule at a glance.</p>
+          <h1 className="text-3xl font-bold text-foreground mb-1 tracking-tight">Calendar</h1>
+          <p className="text-muted-foreground">Your schedule at a glance.</p>
         </div>
         
         {/* View Toggle */}
-        <div className="flex items-center gap-1 p-1 bg-muted rounded-lg">
-          <Button
-            variant="ghost"
-            size="sm"
+        <div className="segmented-control">
+          <button
             onClick={() => setViewMode("agenda")}
-            className={cn(
-              "px-3",
-              viewMode === "agenda" && "bg-card"
-            )}
+            data-active={viewMode === "agenda"}
+            className="segmented-control-item text-xs flex items-center gap-1.5"
           >
-            <List className="w-4 h-4 mr-2" />
+            <List className="w-3.5 h-3.5" />
             Agenda
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
+          </button>
+          <button
             onClick={() => setViewMode("month")}
-            className={cn(
-              "px-3",
-              viewMode === "month" && "bg-card"
-            )}
+            data-active={viewMode === "month"}
+            className="segmented-control-item text-xs flex items-center gap-1.5"
           >
-            <Grid className="w-4 h-4 mr-2" />
+            <Grid3X3 className="w-3.5 h-3.5" />
             Month
-          </Button>
+          </button>
         </div>
-      </div>
+      </motion.div>
 
       {/* Error */}
       {error && (
@@ -125,32 +123,39 @@ export default function CalendarPage() {
 
       {/* Month View */}
       {viewMode === "month" && (
-        <div className="card-matte p-6">
+        <motion.div 
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.05, duration: 0.28 }}
+          className="card-matte p-5"
+        >
           {/* Month Navigation */}
-          <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center justify-between mb-5">
             <Button
               variant="ghost"
               size="icon"
               onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}
+              className="h-8 w-8 rounded-lg"
             >
-              <ChevronLeft className="w-5 h-5" />
+              <ChevronLeft className="w-4 h-4" />
             </Button>
-            <h2 className="text-xl font-semibold text-primary-content">
+            <h2 className="text-lg font-semibold text-foreground">
               {format(currentMonth, "MMMM yyyy")}
             </h2>
             <Button
               variant="ghost"
               size="icon"
               onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}
+              className="h-8 w-8 rounded-lg"
             >
-              <ChevronRight className="w-5 h-5" />
+              <ChevronRight className="w-4 h-4" />
             </Button>
           </div>
 
           {/* Day Headers */}
           <div className="grid grid-cols-7 gap-1 mb-2">
             {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map((day) => (
-              <div key={day} className="text-center text-xs text-muted-foreground py-2">
+              <div key={day} className="text-center text-2xs text-muted-foreground py-2 font-medium">
                 {day}
               </div>
             ))}
@@ -172,26 +177,26 @@ export default function CalendarPage() {
                   key={day.toISOString()}
                   onClick={() => setSelectedDate(day)}
                   className={cn(
-                    "aspect-square p-1 rounded-lg transition-all btn-press",
+                    "aspect-square p-1.5 rounded-lg transition-all duration-120",
                     "flex flex-col items-center justify-start gap-1",
-                    isToday(day) && "border border-primary/30 bg-primary/5",
-                    isSelected && "bg-primary/20 border-primary/50",
-                    !isToday(day) && !isSelected && "hover:bg-muted"
+                    isToday(day) && "bg-primary/10 border border-primary/25",
+                    isSelected && "bg-primary/20 border-primary/40",
+                    !isToday(day) && !isSelected && "hover:bg-muted/50"
                   )}
                 >
                   <span className={cn(
-                    "text-sm font-medium",
-                    isToday(day) ? "text-primary" : "text-primary-content"
+                    "text-xs font-medium",
+                    isToday(day) ? "text-primary" : "text-foreground"
                   )}>
                     {format(day, "d")}
                   </span>
                   {assignments.length > 0 && (
-                    <div className="flex gap-0.5">
+                    <div className="flex gap-0.5 flex-wrap justify-center">
                       {assignments.slice(0, 3).map((a, i) => (
                         <div
                           key={i}
-                          className="w-1.5 h-1.5 rounded-full"
-                          style={{ backgroundColor: a.course_color || "#4DA3FF" }}
+                          className="w-1 h-1 rounded-full"
+                          style={{ backgroundColor: a.course_color || "hsl(var(--primary))" }}
                         />
                       ))}
                     </div>
@@ -203,12 +208,12 @@ export default function CalendarPage() {
 
           {/* Selected Date Assignments */}
           {selectedDate && (
-            <div className="mt-6 pt-6 border-t border-border">
-              <h3 className="text-lg font-semibold text-primary-content mb-4">
+            <div className="mt-5 pt-5 border-t border-border">
+              <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3">
                 {format(selectedDate, "EEEE, MMMM d")}
               </h3>
               {getAssignmentsForDate(selectedDate).length > 0 ? (
-                <div className="space-y-3">
+                <div className="space-y-2">
                   {getAssignmentsForDate(selectedDate).map((assignment) => (
                     <AssignmentCardRow
                       key={assignment.id}
@@ -222,23 +227,28 @@ export default function CalendarPage() {
               )}
             </div>
           )}
-        </div>
+        </motion.div>
       )}
 
       {/* Agenda View */}
       {viewMode === "agenda" && (
-        <div className="space-y-6">
+        <motion.div 
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.05, duration: 0.28 }}
+          className="space-y-5"
+        >
           {isLoading ? (
             <SkeletonList count={5} />
           ) : Object.keys(groupedByDate).length > 0 ? (
             Object.entries(groupedByDate)
               .sort(([a], [b]) => a.localeCompare(b))
               .map(([dateKey, assignments]) => (
-                <div key={dateKey} className="animate-fade-in">
-                  <h3 className="text-sm font-medium text-muted-foreground mb-3 sticky top-20 bg-background/80 backdrop-blur-sm py-2 z-10">
+                <div key={dateKey}>
+                  <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2 sticky top-14 bg-background/90 backdrop-blur-sm py-2 z-10">
                     {format(new Date(dateKey), "EEEE, MMMM d")}
                   </h3>
-                  <div className="space-y-3">
+                  <div className="space-y-2">
                     {assignments.map((assignment) => (
                       <AssignmentCardRow
                         key={assignment.id}
@@ -256,7 +266,7 @@ export default function CalendarPage() {
               description="No upcoming assignments"
             />
           )}
-        </div>
+        </motion.div>
       )}
 
       {/* Details Drawer */}
