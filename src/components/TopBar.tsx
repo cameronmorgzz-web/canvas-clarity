@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useSettings } from "@/hooks/use-settings";
+import { useToastActions } from "@/hooks/use-toast-actions";
 
 interface TopBarProps {
   lastUpdated: Date | null;
@@ -26,9 +27,16 @@ export function TopBar({
 }: TopBarProps) {
   const navigate = useNavigate();
   const { focusMode, toggleFocusMode } = useSettings();
+  const { showFocusMode } = useToastActions();
   const [search, setSearch] = useState("");
   const [dateRange, setDateRange] = useState<DateRange>("week");
   const [searchFocused, setSearchFocused] = useState(false);
+
+  const handleFocusToggle = useCallback(() => {
+    const newFocusMode = !focusMode;
+    toggleFocusMode();
+    showFocusMode(newFocusMode);
+  }, [focusMode, toggleFocusMode, showFocusMode]);
 
   const handleSearch = useCallback((e: React.FormEvent) => {
     e.preventDefault();
@@ -123,7 +131,7 @@ export function TopBar({
         <Button
           variant="ghost"
           size="icon"
-          onClick={toggleFocusMode}
+          onClick={handleFocusToggle}
           className={cn(
             "h-8 w-8 rounded-lg",
             focusMode && "bg-primary/15 text-primary"
