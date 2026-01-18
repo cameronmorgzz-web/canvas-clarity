@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { Link, useLocation } from "react-router-dom";
 import { 
   Home, 
@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { iosEase } from "@/lib/animations";
 
 interface SidebarNavProps {
   collapsed: boolean;
@@ -30,12 +31,18 @@ export function SidebarNav({ collapsed, onToggle }: SidebarNavProps) {
   const location = useLocation();
 
   return (
-    <aside
+    <motion.aside
+      initial={false}
+      animate={{ width: collapsed ? 64 : 240 }}
+      transition={{
+        type: "spring",
+        stiffness: 400,
+        damping: 30,
+      }}
       className={cn(
         "fixed left-0 top-0 bottom-0 z-40",
         "flex flex-col bg-sidebar border-r border-sidebar-border",
-        "transition-all duration-300 ease-out",
-        collapsed ? "w-16" : "w-60"
+        "overflow-hidden"
       )}
     >
       {/* Logo */}
@@ -43,25 +50,32 @@ export function SidebarNav({ collapsed, onToggle }: SidebarNavProps) {
         "h-16 flex items-center px-4 border-b border-sidebar-border",
         collapsed ? "justify-center" : "justify-between"
       )}>
-        {!collapsed && (
-          <Link to="/" className="flex items-center gap-2 group">
-            <div className="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center">
-              <Sparkles className="w-5 h-5 text-primary" />
-            </div>
-            <span className="font-semibold text-lg text-primary-content">
-              Canvas++
-            </span>
-          </Link>
-        )}
-        {collapsed && (
-          <div className="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center">
+        <Link to="/" className="flex items-center gap-3 group">
+          <motion.div 
+            className="w-9 h-9 rounded-xl bg-primary/15 flex items-center justify-center glow-primary-soft"
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+          >
             <Sparkles className="w-5 h-5 text-primary" />
-          </div>
-        )}
+          </motion.div>
+          <AnimatePresence mode="wait">
+            {!collapsed && (
+              <motion.span 
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -10 }}
+                transition={{ duration: 0.2, ease: iosEase }}
+                className="font-bold text-lg text-primary-content tracking-tight"
+              >
+                Canvas++
+              </motion.span>
+            )}
+          </AnimatePresence>
+        </Link>
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 py-4 px-2 space-y-1">
+      <nav className="flex-1 py-4 px-2 space-y-1 relative">
         {navItems.map((item) => {
           const isActive = location.pathname === item.path;
           const Icon = item.icon;
@@ -71,25 +85,73 @@ export function SidebarNav({ collapsed, onToggle }: SidebarNavProps) {
               key={item.path}
               to={item.path}
               className={cn(
-                "flex items-center gap-3 px-3 py-2.5 rounded-lg",
-                "transition-all duration-200",
-                "focus-ring btn-press",
+                "relative flex items-center gap-3 px-3 py-2.5 rounded-xl",
+                "transition-colors duration-200",
+                "focus-ring",
                 isActive 
-                  ? "bg-sidebar-accent text-sidebar-accent-foreground" 
-                  : "text-sidebar-foreground hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground",
+                  ? "text-primary-content" 
+                  : "text-sidebar-foreground hover:text-sidebar-accent-foreground",
                 collapsed && "justify-center px-0"
               )}
               title={collapsed ? item.label : undefined}
             >
-              <Icon className={cn("w-5 h-5 shrink-0", isActive && "text-primary")} />
-              {!collapsed && (
-                <>
-                  <span className="flex-1 font-medium">{item.label}</span>
-                  <span className="text-xs text-muted-foreground opacity-50">
-                    {item.shortcut}
-                  </span>
-                </>
+              {/* Active background */}
+              {isActive && (
+                <motion.div
+                  layoutId="activeNavBg"
+                  className="absolute inset-0 bg-sidebar-accent rounded-xl"
+                  initial={false}
+                  transition={{
+                    type: "spring",
+                    stiffness: 500,
+                    damping: 35,
+                  }}
+                />
               )}
+              
+              {/* Active left indicator */}
+              {isActive && (
+                <motion.div
+                  layoutId="activeNavIndicator"
+                  className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-5 bg-primary rounded-full"
+                  initial={false}
+                  transition={{
+                    type: "spring",
+                    stiffness: 500,
+                    damping: 35,
+                  }}
+                  style={{
+                    boxShadow: "0 0 12px 2px hsl(var(--primary) / 0.5)",
+                  }}
+                />
+              )}
+              
+              <motion.div
+                className="relative z-10 flex items-center gap-3"
+                whileHover={{ x: collapsed ? 0 : 2 }}
+                transition={{ duration: 0.15 }}
+              >
+                <Icon className={cn(
+                  "w-5 h-5 shrink-0 transition-colors duration-200",
+                  isActive && "text-primary"
+                )} />
+                <AnimatePresence mode="wait">
+                  {!collapsed && (
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.15 }}
+                      className="flex items-center gap-3 flex-1"
+                    >
+                      <span className="font-medium">{item.label}</span>
+                      <span className="ml-auto text-[10px] text-muted-foreground/50 font-mono tracking-wider">
+                        {item.shortcut}
+                      </span>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </motion.div>
             </Link>
           );
         })}
@@ -97,26 +159,42 @@ export function SidebarNav({ collapsed, onToggle }: SidebarNavProps) {
 
       {/* Collapse Toggle */}
       <div className="p-2 border-t border-sidebar-border">
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={onToggle}
-          className={cn(
-            "w-full justify-center text-sidebar-foreground hover:bg-sidebar-accent",
-            !collapsed && "justify-start px-3"
-          )}
-          aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+        <motion.div
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
         >
-          {collapsed ? (
-            <ChevronRight className="w-4 h-4" />
-          ) : (
-            <>
-              <ChevronLeft className="w-4 h-4 mr-2" />
-              Collapse
-            </>
-          )}
-        </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onToggle}
+            className={cn(
+              "w-full justify-center text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+              !collapsed && "justify-start px-3"
+            )}
+            aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+          >
+            <motion.div
+              animate={{ rotate: collapsed ? 0 : 180 }}
+              transition={{ duration: 0.2 }}
+            >
+              <ChevronRight className="w-4 h-4" />
+            </motion.div>
+            <AnimatePresence mode="wait">
+              {!collapsed && (
+                <motion.span
+                  initial={{ opacity: 0, width: 0 }}
+                  animate={{ opacity: 1, width: "auto" }}
+                  exit={{ opacity: 0, width: 0 }}
+                  transition={{ duration: 0.15 }}
+                  className="ml-2"
+                >
+                  Collapse
+                </motion.span>
+              )}
+            </AnimatePresence>
+          </Button>
+        </motion.div>
       </div>
-    </aside>
+    </motion.aside>
   );
 }
