@@ -1,8 +1,8 @@
 /* Aurora Background - GPU-accelerated CSS animations */
 
 .aurora-container {
-  contain: strict;
-  will-change: auto;
+  position: absolute;
+  inset: 0;
 }
 
 .aurora-wave {

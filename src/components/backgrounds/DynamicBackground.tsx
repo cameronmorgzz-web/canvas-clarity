@@ -34,9 +34,14 @@ export const DynamicBackground = memo(function DynamicBackground() {
   // In performance mode, skip texture overlay
   const showTexture = shouldAnimate && performanceMode !== "performance";
 
+  // The background layer with animations on top
   return (
     <div 
-      className="fixed inset-0 overflow-hidden pointer-events-none z-0"
+      className="fixed inset-0 overflow-hidden pointer-events-none"
+      style={{ 
+        zIndex: 0,
+        background: "hsl(var(--background))",
+      }}
     >
       {/* Background style */}
       {backgroundStyle === "aurora" && showAnimatedBackground && (
