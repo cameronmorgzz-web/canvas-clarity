@@ -11,8 +11,8 @@ import {
   Megaphone, 
   Rows3, 
   LayoutGrid,
-  Keyboard,
-  Palette
+  Palette,
+  MousePointer2
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
@@ -33,6 +33,7 @@ import {
 import { cn } from "@/lib/utils";
 import { useState } from "react";
 import { VisualSettingsPanel } from "@/components/VisualSettingsPanel";
+import { useCursor } from "@/hooks/use-cursor";
 
 const REFRESH_INTERVALS = [
   { value: "30000", label: "30 seconds" },
@@ -53,6 +54,7 @@ export default function SettingsPage() {
     setDensity,
   } = useSettings();
 
+  const { isCustomCursorEnabled, setCustomCursorEnabled } = useCursor();
   const [isForceRefreshing, setIsForceRefreshing] = useState(false);
 
   const { data: health, isLoading: healthLoading } = useQuery({
@@ -295,38 +297,28 @@ export default function SettingsPage() {
                 onCheckedChange={setShowAnnouncements}
               />
             </div>
-          </motion.section>
 
-          {/* Keyboard Shortcuts */}
-          <motion.section 
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2, duration: 0.28 }}
-            className="card-matte p-5 space-y-4"
-          >
-            <div className="flex items-center gap-2">
-              <Keyboard className="w-4 h-4 text-muted-foreground" />
-              <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">Keyboard Shortcuts</h2>
-            </div>
-            
-            <div className="grid gap-2 text-sm">
-              {[
-                { keys: "⌘ K", description: "Open command palette" },
-                { keys: "/", description: "Focus search" },
-                { keys: "G H", description: "Go to Home" },
-                { keys: "G A", description: "Go to Assignments" },
-                { keys: "G C", description: "Go to Calendar" },
-                { keys: "G O", description: "Go to Courses" },
-                { keys: "G S", description: "Go to Settings" },
-                { keys: "Esc", description: "Close drawer/modal" },
-              ].map(({ keys, description }) => (
-                <div key={keys} className="flex items-center justify-between py-1">
-                  <span className="text-muted-foreground text-xs">{description}</span>
-                  <kbd className="inline-flex items-center gap-1 px-2 py-1 rounded-md border border-border bg-muted/50 font-mono text-2xs text-muted-foreground">
-                    {keys}
-                  </kbd>
+            <div className="section-divider" />
+
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-lg bg-muted/50 flex items-center justify-center">
+                  <MousePointer2 className="w-4 h-4 text-muted-foreground" />
                 </div>
-              ))}
+                <div>
+                  <Label htmlFor="custom-cursor" className="font-medium text-foreground text-sm">
+                    Custom cursor
+                  </Label>
+                  <p className="text-xs text-muted-foreground">
+                    Enable custom cursor with glow effect
+                  </p>
+                </div>
+              </div>
+              <Switch
+                id="custom-cursor"
+                checked={isCustomCursorEnabled}
+                onCheckedChange={setCustomCursorEnabled}
+              />
             </div>
           </motion.section>
         </TabsContent>
