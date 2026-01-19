@@ -36,8 +36,7 @@ export const DynamicBackground = memo(function DynamicBackground() {
 
   return (
     <div 
-      className="fixed inset-0 -z-10 overflow-hidden pointer-events-none"
-      style={{ contain: "strict" }}
+      className="fixed inset-0 overflow-hidden pointer-events-none z-0"
     >
       {/* Background style */}
       {backgroundStyle === "aurora" && showAnimatedBackground && (
@@ -79,12 +78,11 @@ export const DynamicBackground = memo(function DynamicBackground() {
       {/* Texture overlay */}
       {showTexture && <TextureOverlay style={textureStyle} />}
       
-      {/* Vignette effect */}
+      {/* Vignette effect - subtle */}
       <div 
         className="absolute inset-0"
         style={{
-          background: "radial-gradient(ellipse at center, transparent 0%, hsl(var(--background)) 100%)",
-          opacity: 0.4,
+          background: "radial-gradient(ellipse at center, transparent 40%, hsl(var(--background) / 0.6) 100%)",
         }}
       />
     </div>
