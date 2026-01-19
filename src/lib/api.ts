@@ -5,37 +5,80 @@ import type {
   CalendarEvent,
   HealthResponse,
 } from "@/types/canvas";
+import { getEnv, validateEnv } from "@/lib/env";
+import { parseApiError, type AppError } from "@/types/errors";
 
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
-const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+/**
+ * Get Supabase configuration from environment
+ */
+function getSupabaseConfig() {
+  const url = getEnv('SUPABASE_URL');
+  const key = getEnv('SUPABASE_ANON_KEY');
+  
+  if (!url || !key) {
+    throw new Error('Supabase configuration not found');
+  }
+  
+  return { url, key };
+}
 
-async function fetchFromCanvas<T>(endpoint: string, params?: Record<string, string>): Promise<T> {
+/**
+ * Fetch data from Canvas edge function with proper error handling
+ */
+async function fetchFromCanvas<T>(
+  endpoint: string, 
+  params?: Record<string, string>
+): Promise<T> {
+  const { url, key } = getSupabaseConfig();
   const searchParams = new URLSearchParams({ endpoint, ...params });
-  const url = `${SUPABASE_URL}/functions/v1/canvas-data?${searchParams}`;
+  const requestUrl = `${url}/functions/v1/canvas-data?${searchParams}`;
 
-  const response = await fetch(url, {
+  const response = await fetch(requestUrl, {
     headers: {
-      Authorization: `Bearer ${SUPABASE_KEY}`,
+      Authorization: `Bearer ${key}`,
       "Content-Type": "application/json",
     },
   });
 
+  const data = await response.json().catch(() => ({}));
+
   if (!response.ok) {
-    const errorData = await response.json().catch(() => ({}));
-    throw new Error(errorData.error || `Request failed with status ${response.status}`);
+    const error = parseApiError(data, response.status);
+    throw error;
   }
 
-  return response.json();
+  return data as T;
 }
 
+/**
+ * Check if Canvas API is configured and accessible
+ */
 export async function checkHealth(): Promise<HealthResponse> {
-  return { ok: true };
+  const { valid, missing } = validateEnv();
+  
+  if (!valid) {
+    return { ok: false };
+  }
+  
+  try {
+    // Quick test by fetching courses
+    await fetchFromCanvas<Course[]>("courses");
+    return { ok: true };
+  } catch {
+    return { ok: false };
+  }
 }
 
+/**
+ * Fetch all active courses
+ */
 export async function fetchCourses(): Promise<Course[]> {
   return fetchFromCanvas<Course[]>("courses");
 }
 
+/**
+ * Fetch upcoming assignments grouped by status
+ */
 export async function fetchUpcoming(days: number = 14): Promise<{
   overdue: Assignment[];
   due_today: Assignment[];
@@ -45,6 +88,23 @@ export async function fetchUpcoming(days: number = 14): Promise<{
   return fetchFromCanvas("upcoming", { days: String(days) });
 }
 
+/**
+ * Fetch assignments for a specific course
+ */
+export async function fetchCourseAssignments(courseId: string): Promise<Assignment[]> {
+  return fetchFromCanvas<Assignment[]>("course_assignments", { courseId });
+}
+
+/**
+ * Fetch announcements for a specific course
+ */
+export async function fetchCourseAnnouncements(courseId: string): Promise<Announcement[]> {
+  return fetchFromCanvas<Announcement[]>("course_announcements", { courseId });
+}
+
+/**
+ * Fetch all assignments with optional filtering
+ */
 export async function fetchAssignments(params: {
   from?: string;
   to?: string;
@@ -79,6 +139,9 @@ export async function fetchAssignments(params: {
   return filtered;
 }
 
+/**
+ * Fetch announcements with optional filtering
+ */
 export async function fetchAnnouncements(params: {
   days?: number;
   courseId?: string;
@@ -96,6 +159,9 @@ export async function fetchAnnouncements(params: {
   return announcements;
 }
 
+/**
+ * Fetch calendar events (assignments as events)
+ */
 export async function fetchCalendar(params: {
   from: string;
   to: string;
@@ -118,7 +184,33 @@ export async function fetchCalendar(params: {
   }));
 }
 
+/**
+ * Trigger a refresh of all data
+ */
 export async function triggerRefresh(): Promise<void> {
-  // No-op for now - data is always fresh from Canvas
   console.log("Refresh triggered - fetching fresh data from Canvas");
+  // The actual refresh happens through React Query invalidation
+}
+
+/**
+ * Check if an error indicates setup is needed
+ */
+export function isSetupNeeded(error: unknown): boolean {
+  if (!error) return false;
+  
+  const appError = error as AppError;
+  return appError.code === 'NOT_CONFIGURED' || appError.code === 'AUTH';
+}
+
+/**
+ * Get user-friendly error message
+ */
+export function getErrorMessage(error: unknown): string {
+  if (!error) return 'An unknown error occurred';
+  
+  const appError = error as AppError;
+  if (appError.message) return appError.message;
+  if (error instanceof Error) return error.message;
+  
+  return 'An unknown error occurred';
 }
