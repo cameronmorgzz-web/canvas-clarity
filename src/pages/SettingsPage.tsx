@@ -73,7 +73,7 @@ export default function SettingsPage() {
   };
 
   return (
-    <div className="max-w-2xl mx-auto space-y-6">
+    <div className="max-w-2xl mx-auto space-y-6 relative z-10">
       {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: 16 }}
