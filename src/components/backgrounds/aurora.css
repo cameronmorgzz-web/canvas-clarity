@@ -1,0 +1,147 @@
+/* Aurora Background - GPU-accelerated CSS animations */
+
+.aurora-container {
+  contain: strict;
+  will-change: auto;
+}
+
+.aurora-wave {
+  position: absolute;
+  filter: blur(60px);
+  border-radius: 50%;
+  will-change: transform;
+  transform: translateZ(0);
+}
+
+/* Primary wave - flowing drift */
+.aurora-wave-primary {
+  top: -50%;
+  left: -25%;
+  width: 150%;
+  height: 100%;
+  opacity: 0.06;
+  background: linear-gradient(
+    135deg,
+    hsl(var(--primary)) 0%,
+    hsl(280 70% 50%) 25%,
+    hsl(200 80% 50%) 50%,
+    hsl(var(--primary)) 75%,
+    hsl(320 70% 50%) 100%
+  );
+  animation: aurora-drift-primary 25s ease-in-out infinite;
+}
+
+.aurora-wave-primary.aurora-color-shift {
+  animation: aurora-drift-primary 25s ease-in-out infinite,
+             aurora-rotate 60s linear infinite;
+}
+
+/* Secondary wave */
+.aurora-wave-secondary {
+  bottom: -30%;
+  right: -20%;
+  width: 120%;
+  height: 80%;
+  opacity: 0.04;
+  background: linear-gradient(
+    -45deg,
+    hsl(180 60% 50%) 0%,
+    hsl(var(--primary)) 40%,
+    hsl(260 70% 60%) 70%,
+    hsl(200 80% 50%) 100%
+  );
+  filter: blur(80px);
+  animation: aurora-drift-secondary 30s ease-in-out infinite;
+  animation-delay: 5s;
+}
+
+/* Tertiary accent glow */
+.aurora-wave-tertiary {
+  top: 30%;
+  left: 20%;
+  width: 60%;
+  height: 50%;
+  opacity: 0.03;
+  background: radial-gradient(
+    ellipse at center,
+    hsl(var(--primary)) 0%,
+    hsl(280 60% 50%) 40%,
+    transparent 70%
+  );
+  filter: blur(50px);
+  animation: aurora-drift-tertiary 20s ease-in-out infinite;
+  animation-delay: 10s;
+}
+
+/* Color shift overlay */
+.aurora-color-overlay {
+  position: absolute;
+  inset: 0;
+  opacity: 0.025;
+  animation: aurora-color-cycle 60s linear infinite;
+}
+
+/* Optimized keyframes - fewer steps, simpler transforms */
+@keyframes aurora-drift-primary {
+  0%, 100% {
+    transform: translate(0, 0) scale(1) translateZ(0);
+  }
+  50% {
+    transform: translate(50px, 30px) scale(1.05) translateZ(0);
+  }
+}
+
+@keyframes aurora-drift-secondary {
+  0%, 100% {
+    transform: translate(0, 0) scale(1) translateZ(0);
+  }
+  50% {
+    transform: translate(-40px, -30px) scale(0.95) translateZ(0);
+  }
+}
+
+@keyframes aurora-drift-tertiary {
+  0%, 100% {
+    transform: translate(0, 0) translateZ(0);
+    opacity: 0.03;
+  }
+  50% {
+    transform: translate(30px, -20px) translateZ(0);
+    opacity: 0.05;
+  }
+}
+
+@keyframes aurora-rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes aurora-color-cycle {
+  0% {
+    background: linear-gradient(45deg, hsl(var(--primary)) 0%, transparent 100%);
+  }
+  25% {
+    background: linear-gradient(135deg, hsl(280 70% 50%) 0%, transparent 100%);
+  }
+  50% {
+    background: linear-gradient(225deg, hsl(200 80% 50%) 0%, transparent 100%);
+  }
+  75% {
+    background: linear-gradient(315deg, hsl(260 70% 60%) 0%, transparent 100%);
+  }
+  100% {
+    background: linear-gradient(405deg, hsl(var(--primary)) 0%, transparent 100%);
+  }
+}
+
+/* Reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  .aurora-wave,
+  .aurora-color-overlay {
+    animation: none !important;
+  }
+}

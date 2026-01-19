@@ -1,0 +1,198 @@
+/* Geometric Background - GPU-accelerated CSS animations */
+
+.geometric-container {
+  contain: strict;
+  will-change: auto;
+}
+
+/* Wave SVG */
+.geometric-waves {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  opacity: 0.04;
+}
+
+.geometric-waves.geometric-parallax {
+  animation: geometric-float 20s ease-in-out infinite;
+}
+
+/* Wave lines with CSS animation for path morphing effect */
+.geometric-line {
+  will-change: transform;
+  transform-origin: center;
+}
+
+.geometric-line-1 {
+  animation: geometric-wave-1 15s ease-in-out infinite;
+}
+
+.geometric-line-2 {
+  animation: geometric-wave-2 18s ease-in-out infinite;
+  animation-delay: 2s;
+}
+
+.geometric-line-3 {
+  animation: geometric-wave-3 12s ease-in-out infinite;
+  animation-delay: 4s;
+}
+
+/* Floating shapes */
+.geometric-shape {
+  position: absolute;
+  border: 1px solid hsl(var(--primary) / 0.05);
+  will-change: transform;
+  transform: translateZ(0);
+}
+
+.geometric-shape-square {
+  top: 10%;
+  left: 15%;
+  width: 128px;
+  height: 128px;
+  border-radius: 12px;
+  opacity: 0.6;
+}
+
+.geometric-shape-circle {
+  top: 60%;
+  right: 20%;
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  border-color: hsl(var(--primary) / 0.03);
+}
+
+.geometric-shape-diamond {
+  bottom: 20%;
+  left: 30%;
+  width: 64px;
+  height: 64px;
+  border-color: hsl(var(--primary) / 0.04);
+  transform: rotate(45deg) translateZ(0);
+}
+
+/* Grid overlay */
+.geometric-grid {
+  position: absolute;
+  inset: 0;
+  opacity: 0.012;
+  background-image:
+    linear-gradient(to right, hsl(var(--primary) / 0.15) 1px, transparent 1px),
+    linear-gradient(to bottom, hsl(var(--primary) / 0.15) 1px, transparent 1px);
+  background-size: 80px 80px;
+}
+
+.geometric-grid-parallax {
+  animation: geometric-grid-float 30s ease-in-out infinite;
+}
+
+/* Shape animations */
+.geometric-rotate {
+  animation: geometric-slow-rotate 60s linear infinite;
+}
+
+.geometric-pulse {
+  animation: geometric-scale-pulse 20s ease-in-out infinite;
+}
+
+.geometric-parallax-shape {
+  animation: geometric-parallax-move 25s ease-in-out infinite;
+}
+
+.geometric-parallax-shape-alt {
+  animation: geometric-parallax-move-alt 20s ease-in-out infinite;
+  animation-delay: 3s;
+}
+
+/* Keyframes - optimized for GPU */
+@keyframes geometric-float {
+  0%, 100% {
+    transform: translateY(0) translateZ(0);
+  }
+  50% {
+    transform: translateY(10px) translateZ(0);
+  }
+}
+
+@keyframes geometric-wave-1 {
+  0%, 100% {
+    transform: scaleY(1) translateY(0) translateZ(0);
+  }
+  50% {
+    transform: scaleY(1.15) translateY(-20px) translateZ(0);
+  }
+}
+
+@keyframes geometric-wave-2 {
+  0%, 100% {
+    transform: scaleY(1) translateY(0) translateZ(0);
+  }
+  50% {
+    transform: scaleY(0.9) translateY(15px) translateZ(0);
+  }
+}
+
+@keyframes geometric-wave-3 {
+  0%, 100% {
+    transform: scaleY(1) translateY(0) translateZ(0);
+  }
+  50% {
+    transform: scaleY(1.1) translateY(-10px) translateZ(0);
+  }
+}
+
+@keyframes geometric-slow-rotate {
+  from {
+    transform: rotate(0deg) translateZ(0);
+  }
+  to {
+    transform: rotate(360deg) translateZ(0);
+  }
+}
+
+@keyframes geometric-scale-pulse {
+  0%, 100% {
+    transform: scale(1) translateZ(0);
+  }
+  50% {
+    transform: scale(1.15) translateZ(0);
+  }
+}
+
+@keyframes geometric-parallax-move {
+  0%, 100% {
+    transform: translate(0, 0) rotate(0deg) translateZ(0);
+  }
+  50% {
+    transform: translate(-10px, 15px) rotate(5deg) translateZ(0);
+  }
+}
+
+@keyframes geometric-parallax-move-alt {
+  0%, 100% {
+    transform: translate(0, 0) scale(1) translateZ(0);
+  }
+  50% {
+    transform: translate(10px, -10px) scale(1.08) translateZ(0);
+  }
+}
+
+@keyframes geometric-grid-float {
+  0%, 100% {
+    transform: translateY(0) translateZ(0);
+  }
+  50% {
+    transform: translateY(5px) translateZ(0);
+  }
+}
+
+/* Reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  .geometric-line,
+  .geometric-shape,
+  .geometric-grid,
+  .geometric-waves {
+    animation: none !important;
+  }
+}

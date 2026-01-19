@@ -1,5 +1,4 @@
 import { memo } from "react";
-import { motion } from "framer-motion";
 import { 
   Sparkles, 
   Grid3X3, 
@@ -10,7 +9,10 @@ import {
   Layers, 
   Palette,
   Gauge,
-  RotateCcw
+  RotateCcw,
+  Zap,
+  Scale,
+  Gem
 } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
@@ -19,7 +21,8 @@ import {
   useVisualSettings, 
   BackgroundStyle, 
   TextureStyle, 
-  GlassIntensity 
+  GlassIntensity,
+  PerformanceMode
 } from "@/hooks/use-visual-settings";
 import { cn } from "@/lib/utils";
 
@@ -45,6 +48,12 @@ const GLASS_OPTIONS: { value: GlassIntensity; label: string; description: string
   { value: "layered", label: "Layered", description: "Multi-depth glassmorphism" },
 ];
 
+const PERFORMANCE_OPTIONS: { value: PerformanceMode; label: string; icon: React.ElementType; description: string }[] = [
+  { value: "quality", label: "Quality", icon: Gem, description: "Full effects, 60fps target" },
+  { value: "balanced", label: "Balanced", icon: Scale, description: "Optimized effects, smooth performance" },
+  { value: "performance", label: "Performance", icon: Zap, description: "Minimal effects, maximum speed" },
+];
+
 const EFFECT_OPTIONS: { key: "cursorGlow" | "reactiveRipples" | "parallaxDepth" | "colorShift"; label: string; icon: React.ElementType; description: string }[] = [
   { key: "cursorGlow", label: "Cursor Glow", icon: MousePointer2, description: "Light trail following cursor" },
   { key: "reactiveRipples", label: "Reactive Ripples", icon: Droplets, description: "Click ripple effects" },
@@ -60,6 +69,8 @@ export const VisualSettingsPanel = memo(function VisualSettingsPanel() {
     setTextureStyle,
     glassIntensity,
     setGlassIntensity,
+    performanceMode,
+    setPerformanceMode,
     specialEffects,
     toggleSpecialEffect,
     reducedMotion,
@@ -69,13 +80,41 @@ export const VisualSettingsPanel = memo(function VisualSettingsPanel() {
 
   return (
     <div className="space-y-6">
+      {/* Performance Mode */}
+      <section className="card-matte p-5 space-y-4">
+        <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide flex items-center gap-2">
+          <Gauge className="w-4 h-4" />
+          Performance Mode
+        </h2>
+        
+        <div className="grid grid-cols-3 gap-2">
+          {PERFORMANCE_OPTIONS.map((option) => {
+            const Icon = option.icon;
+            return (
+              <button
+                key={option.value}
+                onClick={() => setPerformanceMode(option.value)}
+                className={cn(
+                  "flex flex-col items-center gap-2 p-3 rounded-xl border transition-all duration-200",
+                  performanceMode === option.value
+                    ? "border-primary bg-primary/10 text-foreground"
+                    : "border-border-subtle bg-muted/30 text-muted-foreground hover:border-border hover:bg-muted/50"
+                )}
+              >
+                <Icon className="w-5 h-5" />
+                <span className="text-xs font-medium">{option.label}</span>
+              </button>
+            );
+          })}
+        </div>
+        
+        <p className="text-xs text-muted-foreground">
+          {PERFORMANCE_OPTIONS.find((o) => o.value === performanceMode)?.description}
+        </p>
+      </section>
+
       {/* Background Style */}
-      <motion.section
-        initial={{ opacity: 0, y: 16 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.05, duration: 0.28 }}
-        className="card-matte p-5 space-y-4"
-      >
+      <section className="card-matte p-5 space-y-4">
         <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
           Background Animation
         </h2>
@@ -104,15 +143,10 @@ export const VisualSettingsPanel = memo(function VisualSettingsPanel() {
         <p className="text-xs text-muted-foreground">
           {BACKGROUND_OPTIONS.find((o) => o.value === backgroundStyle)?.description}
         </p>
-      </motion.section>
+      </section>
 
       {/* Texture Style */}
-      <motion.section
-        initial={{ opacity: 0, y: 16 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.1, duration: 0.28 }}
-        className="card-matte p-5 space-y-4"
-      >
+      <section className="card-matte p-5 space-y-4">
         <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
           Texture Overlay
         </h2>
@@ -139,15 +173,10 @@ export const VisualSettingsPanel = memo(function VisualSettingsPanel() {
             </button>
           ))}
         </div>
-      </motion.section>
+      </section>
 
       {/* Glass Intensity */}
-      <motion.section
-        initial={{ opacity: 0, y: 16 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.15, duration: 0.28 }}
-        className="card-matte p-5 space-y-4"
-      >
+      <section className="card-matte p-5 space-y-4">
         <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
           Glass Effect Intensity
         </h2>
@@ -174,15 +203,10 @@ export const VisualSettingsPanel = memo(function VisualSettingsPanel() {
             </button>
           ))}
         </div>
-      </motion.section>
+      </section>
 
       {/* Special Effects */}
-      <motion.section
-        initial={{ opacity: 0, y: 16 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.2, duration: 0.28 }}
-        className="card-matte p-5 space-y-4"
-      >
+      <section className="card-matte p-5 space-y-4">
         <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
           Special Effects
         </h2>
@@ -212,17 +236,12 @@ export const VisualSettingsPanel = memo(function VisualSettingsPanel() {
             );
           })}
         </div>
-      </motion.section>
+      </section>
 
-      {/* Performance */}
-      <motion.section
-        initial={{ opacity: 0, y: 16 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.25, duration: 0.28 }}
-        className="card-matte p-5 space-y-4"
-      >
+      {/* Accessibility */}
+      <section className="card-matte p-5 space-y-4">
         <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
-          Performance
+          Accessibility
         </h2>
         
         <div className="flex items-center justify-between">
@@ -234,7 +253,7 @@ export const VisualSettingsPanel = memo(function VisualSettingsPanel() {
               <Label className="font-medium text-foreground text-sm">
                 Reduced Motion
               </Label>
-              <p className="text-2xs text-muted-foreground">Disable animations for performance</p>
+              <p className="text-2xs text-muted-foreground">Disable all animations</p>
             </div>
           </div>
           <Switch
@@ -254,7 +273,7 @@ export const VisualSettingsPanel = memo(function VisualSettingsPanel() {
           <RotateCcw className="w-3.5 h-3.5 mr-2" />
           Reset to Defaults
         </Button>
-      </motion.section>
+      </section>
     </div>
   );
 });
