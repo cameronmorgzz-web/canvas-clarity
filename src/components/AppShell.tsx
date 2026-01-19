@@ -95,7 +95,7 @@ export function AppShell() {
       )}
       
       <motion.div 
-        className="flex-1 flex flex-col"
+        className="flex-1 flex flex-col relative z-10"
         initial={false}
         animate={{ marginLeft: isMobile ? 0 : (sidebarCollapsed ? 60 : 220) }}
         transition={{ type: "spring", stiffness: 400, damping: 32 }}
@@ -111,7 +111,7 @@ export function AppShell() {
           id="main-content"
           ref={mainRef}
           className={cn(
-            "flex-1 overflow-auto",
+            "flex-1 overflow-auto relative",
             density === "compact" ? "p-4" : "p-6",
             isMobile && "pb-20" // Space for bottom nav
           )}
