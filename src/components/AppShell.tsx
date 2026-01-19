@@ -8,6 +8,7 @@ import { TopBar } from "@/components/TopBar";
 import { CommandPalette } from "@/components/CommandPalette";
 import { BottomNav } from "@/components/BottomNav";
 import { NavigationProgress } from "@/components/NavigationProgress";
+import { AssistantPanel } from "@/components/AssistantPanel";
 import { useKeyboardShortcuts } from "@/hooks/use-keyboard-shortcuts";
 import { useCommandPalette } from "@/hooks/use-command-palette";
 import { useSettings } from "@/hooks/use-settings";
@@ -127,6 +128,9 @@ export function AppShell() {
 
       {/* Command Palette */}
       <CommandPalette open={commandPaletteOpen} onClose={closeCommandPalette} />
+
+      {/* AI Assistant Panel */}
+      <AssistantPanel />
     </div>
   );
 }

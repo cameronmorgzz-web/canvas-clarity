@@ -8,11 +8,13 @@ import {
   Settings, 
   ChevronRight,
   Sparkles,
-  Command
+  Command,
+  MessageSquare
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { useSettings } from "@/hooks/use-settings";
+import { useAssistant } from "@/hooks/use-assistant";
 
 interface SidebarNavProps {
   collapsed: boolean;
@@ -30,6 +32,7 @@ const navItems = [
 export function SidebarNav({ collapsed, onToggle }: SidebarNavProps) {
   const location = useLocation();
   const { focusMode } = useSettings();
+  const { toggle: toggleAssistant, messages } = useAssistant();
 
   return (
     <motion.aside
@@ -161,6 +164,43 @@ export function SidebarNav({ collapsed, onToggle }: SidebarNavProps) {
           );
         })}
       </nav>
+
+      {/* Assistant Button */}
+      <div className="px-2 pb-2">
+        <Button
+          variant="ghost"
+          onClick={toggleAssistant}
+          className={cn(
+            "w-full gap-2.5 justify-start px-2.5 py-2",
+            "text-sidebar-foreground hover:text-sidebar-accent-foreground hover:bg-sidebar-accent/50",
+            "bg-primary/5 border border-primary/10",
+            collapsed && "justify-center px-2"
+          )}
+        >
+          <div className="w-[18px] h-[18px] shrink-0 flex items-center justify-center">
+            <MessageSquare className="w-[18px] h-[18px] text-primary" />
+          </div>
+          <AnimatePresence mode="wait">
+            {!collapsed && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.12 }}
+                className="flex items-center justify-between flex-1 min-w-0"
+              >
+                <span className="text-sm font-medium">Assistant</span>
+                <span className="text-2xs text-muted-foreground/40 font-mono tracking-wider">
+                  ⌘J
+                </span>
+              </motion.div>
+            )}
+          </AnimatePresence>
+          {messages.length > 0 && (
+            <div className="absolute right-2 top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-primary" />
+          )}
+        </Button>
+      </div>
 
       {/* Command Palette Hint */}
       <AnimatePresence>

@@ -1,12 +1,13 @@
 import { useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Search, RefreshCw, Eye, EyeOff, Command } from "lucide-react";
+import { Search, RefreshCw, Eye, EyeOff, Command, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useSettings } from "@/hooks/use-settings";
 import { useToastActions } from "@/hooks/use-toast-actions";
+import { useAssistant } from "@/hooks/use-assistant";
 
 interface TopBarProps {
   lastUpdated: Date | null;
@@ -28,6 +29,7 @@ export function TopBar({
   const navigate = useNavigate();
   const { focusMode, toggleFocusMode } = useSettings();
   const { showFocusMode } = useToastActions();
+  const { toggle: toggleAssistant } = useAssistant();
   const [search, setSearch] = useState("");
   const [dateRange, setDateRange] = useState<DateRange>("week");
   const [searchFocused, setSearchFocused] = useState(false);
@@ -127,6 +129,28 @@ export function TopBar({
 
       {/* Right section */}
       <div className="flex items-center gap-2">
+        {/* Ask Canvas++ Button */}
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={toggleAssistant}
+          className="hidden sm:flex items-center gap-2 h-8 px-3 bg-primary/10 border-primary/20 hover:bg-primary/20 hover:border-primary/30 text-primary"
+        >
+          <Sparkles className="w-3.5 h-3.5" />
+          <span className="text-xs font-medium">Ask Canvas++</span>
+        </Button>
+        
+        {/* Mobile Ask Button */}
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={toggleAssistant}
+          className="sm:hidden h-8 w-8 rounded-lg text-primary"
+          aria-label="Ask Canvas++"
+        >
+          <Sparkles className="w-4 h-4" />
+        </Button>
+
         {/* Focus Mode Toggle */}
         <Button
           variant="ghost"

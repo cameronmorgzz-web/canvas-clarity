@@ -1,8 +1,10 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAssistant } from "@/hooks/use-assistant";
 
 export function useKeyboardShortcuts() {
   const navigate = useNavigate();
+  const { toggle: toggleAssistant } = useAssistant();
 
   useEffect(() => {
     let gPressed = false;
@@ -17,6 +19,13 @@ export function useKeyboardShortcuts() {
         e.preventDefault();
         const searchInput = document.querySelector<HTMLInputElement>('[data-search-input]');
         searchInput?.focus();
+        return;
+      }
+
+      // Toggle assistant with Cmd+J / Ctrl+J
+      if (e.key === "j" && (e.metaKey || e.ctrlKey)) {
+        e.preventDefault();
+        toggleAssistant();
         return;
       }
 
@@ -66,5 +75,5 @@ export function useKeyboardShortcuts() {
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [navigate]);
+  }, [navigate, toggleAssistant]);
 }
