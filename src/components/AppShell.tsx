@@ -10,7 +10,7 @@ import { BottomNav } from "@/components/BottomNav";
 import { NavigationProgress } from "@/components/NavigationProgress";
 import { AssistantPanel } from "@/components/AssistantPanel";
 import { CustomCursor } from "@/components/CustomCursor";
-import { AnimatedBackground } from "@/components/AnimatedBackground";
+import { DynamicBackground } from "@/components/backgrounds/DynamicBackground";
 import { useKeyboardShortcuts } from "@/hooks/use-keyboard-shortcuts";
 import { useCommandPalette } from "@/hooks/use-command-palette";
 import { useSettings } from "@/hooks/use-settings";
@@ -72,8 +72,8 @@ export function AppShell() {
       {/* Custom Cursor */}
       <CustomCursor />
       
-      {/* Animated Background */}
-      <AnimatedBackground />
+      {/* Dynamic Background */}
+      <DynamicBackground />
       
       {/* Navigation Progress Bar */}
       <NavigationProgress />

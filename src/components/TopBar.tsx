@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { useSettings } from "@/hooks/use-settings";
 import { useToastActions } from "@/hooks/use-toast-actions";
 import { useAssistant } from "@/hooks/use-assistant";
+import { useVisualSettings } from "@/hooks/use-visual-settings";
 
 interface TopBarProps {
   lastUpdated: Date | null;
@@ -30,9 +31,17 @@ export function TopBar({
   const { focusMode, toggleFocusMode } = useSettings();
   const { showFocusMode } = useToastActions();
   const { toggle: toggleAssistant } = useAssistant();
+  const { glassIntensity } = useVisualSettings();
   const [search, setSearch] = useState("");
   const [dateRange, setDateRange] = useState<DateRange>("week");
   const [searchFocused, setSearchFocused] = useState(false);
+  
+  const glassClasses = {
+    heavy: "backdrop-blur-3xl bg-background/95 border-b border-border-subtle",
+    medium: "backdrop-blur-2xl bg-background/85 border-b border-border-subtle",
+    light: "backdrop-blur-md bg-background/70 border-b border-border-subtle",
+    layered: "backdrop-blur-2xl bg-gradient-to-b from-background/90 to-background/80 border-b border-border-subtle",
+  };
 
   const handleFocusToggle = useCallback(() => {
     const newFocusMode = !focusMode;
@@ -62,7 +71,8 @@ export function TopBar({
 
   return (
     <header className={cn(
-      "h-14 topbar-glass",
+      "h-14",
+      glassClasses[glassIntensity],
       "flex items-center justify-between gap-4 px-5",
       "sticky top-0 z-30",
       className
