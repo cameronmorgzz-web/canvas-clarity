@@ -15,6 +15,7 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { useSettings } from "@/hooks/use-settings";
 import { useAssistant } from "@/hooks/use-assistant";
+import { useVisualSettings } from "@/hooks/use-visual-settings";
 
 interface SidebarNavProps {
   collapsed: boolean;
@@ -33,6 +34,14 @@ export function SidebarNav({ collapsed, onToggle }: SidebarNavProps) {
   const location = useLocation();
   const { focusMode } = useSettings();
   const { toggle: toggleAssistant, messages } = useAssistant();
+  const { glassIntensity } = useVisualSettings();
+  
+  const glassClasses = {
+    heavy: "backdrop-blur-3xl bg-sidebar/90",
+    medium: "backdrop-blur-2xl bg-sidebar/80",
+    light: "backdrop-blur-md bg-sidebar/60",
+    layered: "backdrop-blur-2xl bg-gradient-to-b from-sidebar/85 to-sidebar/75",
+  };
 
   return (
     <motion.aside
@@ -49,7 +58,8 @@ export function SidebarNav({ collapsed, onToggle }: SidebarNavProps) {
       className={cn(
         "fixed left-0 top-0 bottom-0 z-40",
         "flex flex-col",
-        "sidebar-glass border-r border-sidebar-border",
+        "border-r border-sidebar-border",
+        glassClasses[glassIntensity],
         "transition-opacity duration-200",
         focusMode && "hover:opacity-100"
       )}
