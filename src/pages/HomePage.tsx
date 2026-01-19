@@ -73,39 +73,39 @@ export default function HomePage() {
   const weekCount = weekItems.length;
 
   return (
-    <div className="max-w-4xl mx-auto space-y-8">
+    <div className="max-w-3xl mx-auto space-y-5">
       {/* Hero Header - Glass */}
       <motion.div
-        initial={{ opacity: 0, y: 16 }}
+        initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.28, ease: [0.32, 0.72, 0, 1] }}
-        className="hero-glass"
+        transition={{ duration: 0.2, ease: [0.32, 0.72, 0, 1] }}
+        className="hero-glass p-5"
       >
         <div className="flex items-start justify-between gap-4">
           <div>
-            <h1 className="text-3xl sm:text-4xl font-bold text-foreground mb-2 tracking-tight">
+            <h1 className="text-2xl sm:text-3xl font-bold text-foreground mb-1 tracking-tight">
               Home
             </h1>
-            <p className="text-muted-foreground">What you need to focus on right now.</p>
+            <p className="text-sm text-muted-foreground">What you need to focus on right now.</p>
           </div>
-          <Sparkles className="w-6 h-6 text-primary/50" />
+          <Sparkles className="w-5 h-5 text-primary/50" />
         </div>
         
         {/* Focus Summary Chips */}
         {!upcomingLoading && (
-          <div className="flex flex-wrap gap-2 mt-5">
+          <div className="flex flex-wrap gap-1.5 mt-4">
             {overdueCount > 0 && (
               <span className="focus-chip focus-chip-urgent">
-                <AlertTriangle className="w-3 h-3" />
+                <AlertTriangle className="w-2.5 h-2.5" />
                 {overdueCount} overdue
               </span>
             )}
             <span className={cn("focus-chip", todayCount > 0 && "focus-chip-today")}>
-              <Clock className="w-3 h-3" />
+              <Clock className="w-2.5 h-2.5" />
               {todayCount} due today
             </span>
             <span className="focus-chip">
-              <CalendarDays className="w-3 h-3" />
+              <CalendarDays className="w-2.5 h-2.5" />
               {weekCount} this week
             </span>
           </div>
@@ -119,15 +119,15 @@ export default function HomePage() {
       {/* Pinned Items */}
       {pinnedItems.length > 0 && (
         <motion.section
-          initial={{ opacity: 0, y: 16 }}
+          initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.05, duration: 0.28 }}
+          transition={{ delay: 0.03, duration: 0.2 }}
         >
-          <div className="flex items-center gap-2 mb-3">
-            <Pin className="w-4 h-4 text-primary" />
-            <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">Pinned</h2>
+          <div className="flex items-center gap-1.5 mb-2">
+            <Pin className="w-3.5 h-3.5 text-primary" />
+            <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Pinned</h2>
           </div>
-          <div className="space-y-2">
+          <div className="space-y-1.5">
             {pinnedItems.map((a) => (
               <AssignmentCardRow key={a.id} assignment={a} onClick={() => handleAssignmentClick(a)} />
             ))}
@@ -138,16 +138,16 @@ export default function HomePage() {
       {/* Overdue Section */}
       {!upcomingLoading && overdueItems.length > 0 && (
         <motion.section
-          initial={{ opacity: 0, y: 16 }}
+          initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.08, duration: 0.28 }}
+          transition={{ delay: 0.05, duration: 0.2 }}
         >
-          <div className="flex items-center gap-2 mb-3">
-            <AlertTriangle className="w-4 h-4 text-status-overdue" />
-            <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">Overdue</h2>
+          <div className="flex items-center gap-1.5 mb-2">
+            <AlertTriangle className="w-3.5 h-3.5 text-status-overdue" />
+            <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Overdue</h2>
             <span className="status-overdue ml-1">{overdueItems.length}</span>
           </div>
-          <div className="space-y-2">
+          <div className="space-y-1.5">
             {overdueItems.map((a) => (
               <AssignmentCardRow key={a.id} assignment={a} onClick={() => handleAssignmentClick(a)} />
             ))}
@@ -157,13 +157,13 @@ export default function HomePage() {
 
       {/* Due Today */}
       <motion.section
-        initial={{ opacity: 0, y: 16 }}
+        initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.12, duration: 0.28 }}
+        transition={{ delay: 0.08, duration: 0.2 }}
       >
-        <div className="flex items-center gap-2 mb-3">
-          <Clock className="w-4 h-4 text-status-today" />
-          <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">Due Today</h2>
+        <div className="flex items-center gap-1.5 mb-2">
+          <Clock className="w-3.5 h-3.5 text-status-today" />
+          <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Due Today</h2>
           {!upcomingLoading && (
             <span className="status-today ml-1">{todayItems.length}</span>
           )}
@@ -171,7 +171,7 @@ export default function HomePage() {
         {upcomingLoading ? (
           <SkeletonList count={2} />
         ) : todayItems.length > 0 ? (
-          <div className="space-y-2">
+          <div className="space-y-1.5">
             {todayItems.map((a) => (
               <AssignmentCardRow key={a.id} assignment={a} onClick={() => handleAssignmentClick(a)} />
             ))}
@@ -183,19 +183,19 @@ export default function HomePage() {
 
       {/* Next Up */}
       <motion.section
-        initial={{ opacity: 0, y: 16 }}
+        initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.16, duration: 0.28 }}
+        transition={{ delay: 0.1, duration: 0.2 }}
       >
-        <div className="flex items-center gap-2 mb-3">
-          <Clock className="w-4 h-4 text-status-soon" />
-          <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">Next Up</h2>
-          <span className="text-xs text-muted-foreground">(48 hours)</span>
+        <div className="flex items-center gap-1.5 mb-2">
+          <Clock className="w-3.5 h-3.5 text-status-soon" />
+          <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Next Up</h2>
+          <span className="text-[10px] text-muted-foreground">(48h)</span>
         </div>
         {upcomingLoading ? (
           <SkeletonList count={2} />
         ) : soonItems.length > 0 ? (
-          <div className="space-y-2">
+          <div className="space-y-1.5">
             {soonItems.map((a) => (
               <AssignmentCardRow key={a.id} assignment={a} onClick={() => handleAssignmentClick(a)} />
             ))}
@@ -207,15 +207,15 @@ export default function HomePage() {
 
       {/* This Week */}
       <motion.section
-        initial={{ opacity: 0, y: 16 }}
+        initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.2, duration: 0.28 }}
+        transition={{ delay: 0.12, duration: 0.2 }}
       >
-        <div className="flex items-center gap-2 mb-3">
-          <CalendarDays className="w-4 h-4 text-primary" />
-          <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">This Week</h2>
+        <div className="flex items-center gap-1.5 mb-2">
+          <CalendarDays className="w-3.5 h-3.5 text-primary" />
+          <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">This Week</h2>
         </div>
-        <div className="card-matte p-4">
+        <div className="card-matte p-3">
           {upcomingLoading ? <SkeletonWeekStrip /> : <WeekStrip assignments={weekItems} />}
         </div>
       </motion.section>
@@ -223,22 +223,22 @@ export default function HomePage() {
       {/* Announcements */}
       {showAnnouncements && (
         <motion.section
-          initial={{ opacity: 0, y: 16 }}
+          initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.24, duration: 0.28 }}
+          transition={{ delay: 0.14, duration: 0.2 }}
         >
-          <div className="flex items-center gap-2 mb-3">
-            <Megaphone className="w-4 h-4 text-primary" />
-            <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">Announcements</h2>
+          <div className="flex items-center gap-1.5 mb-2">
+            <Megaphone className="w-3.5 h-3.5 text-primary" />
+            <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Announcements</h2>
           </div>
           {announcementsError && (
             <ErrorBanner message="Couldn't load announcements" onRetry={() => refetchAnnouncements()} />
           )}
           {announcementsLoading ? (
-            <SkeletonList count={3} />
+            <SkeletonList count={2} />
           ) : announcements && announcements.length > 0 ? (
-            <div className="space-y-2">
-              {announcements.slice(0, 5).map((a) => <AnnouncementCard key={a.id} announcement={a} />)}
+            <div className="space-y-1.5">
+              {announcements.slice(0, 3).map((a) => <AnnouncementCard key={a.id} announcement={a} />)}
             </div>
           ) : (
             <EmptyStateCard type="no-items" title="No new announcements" />
