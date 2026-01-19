@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { format, formatDistanceToNow, isToday, isTomorrow, isPast } from "date-fns";
-import { ExternalLink, ChevronRight, Pin } from "lucide-react";
+import { ExternalLink, ChevronRight, Pin, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Assignment } from "@/types/canvas";
 import { StatusBadge } from "./StatusBadge";
@@ -22,11 +22,12 @@ export function AssignmentCardRow({
   showGrades = true,
   className 
 }: AssignmentCardRowProps) {
-  const { density, isPinned, togglePinAssignment } = useSettings();
-  const { showPinned } = useToastActions();
+  const { density, isPinned, togglePinAssignment, isCompleted, toggleCompleteAssignment, uncompleteAssignment } = useSettings();
+  const { showPinned, showCompleted } = useToastActions();
   const dueDate = new Date(assignment.due_at);
   const isOverdue = isPast(dueDate) && assignment.submission_state !== "submitted" && assignment.submission_state !== "graded";
   const pinned = isPinned(assignment.id);
+  const completed = isCompleted(assignment.id);
   const isCompact = density === "compact";
 
   const formatDueDate = () => {
@@ -49,6 +50,13 @@ export function AssignmentCardRow({
     showPinned(newPinned);
   };
 
+  const handleComplete = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const newCompleted = !completed;
+    toggleCompleteAssignment(assignment.id);
+    showCompleted(newCompleted, newCompleted ? () => uncompleteAssignment(assignment.id) : undefined);
+  };
+
   return (
     <motion.div 
       initial={{ opacity: 0, y: 8 }}
@@ -59,7 +67,8 @@ export function AssignmentCardRow({
       className={cn(
         "card-interactive cursor-pointer group relative",
         isCompact ? "p-3" : "p-4",
-        isOverdue && "card-overdue",
+        isOverdue && !completed && "card-overdue",
+        completed && "opacity-60",
         className
       )}
       onClick={onClick}
@@ -88,13 +97,20 @@ export function AssignmentCardRow({
                 Pinned
               </span>
             )}
+            {completed && (
+              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-2xs font-medium bg-green-500/10 text-green-500 border border-green-500/20">
+                <Check className="w-2.5 h-2.5" />
+                Done
+              </span>
+            )}
           </div>
           
           {/* Row 2: Title */}
           <h3 className={cn(
             "font-semibold text-foreground truncate mb-1",
             "group-hover:text-primary transition-colors duration-120",
-            isCompact ? "text-sm" : "text-base"
+            isCompact ? "text-sm" : "text-base",
+            completed && "line-through text-muted-foreground"
           )}>
             {assignment.name}
           </h3>
@@ -103,7 +119,7 @@ export function AssignmentCardRow({
           <div className="flex items-center gap-3 text-sm text-muted-foreground">
             <span className={cn(
               "transition-colors duration-120",
-              isOverdue && "text-status-overdue font-medium"
+              isOverdue && !completed && "text-status-overdue font-medium"
             )}>
               {formatDueDate()}
             </span>
@@ -124,6 +140,21 @@ export function AssignmentCardRow({
             whileHover={{ opacity: 1 }}
             className="opacity-0 group-hover:opacity-100 flex items-center gap-1 transition-opacity"
           >
+            <Button
+              variant="ghost"
+              size="icon"
+              className={cn(
+                "h-7 w-7 rounded-md",
+                completed && "bg-green-500/10 text-green-500"
+              )}
+              onClick={handleComplete}
+              aria-label={completed ? "Mark incomplete" : "Mark complete"}
+            >
+              <Check className={cn(
+                "w-3.5 h-3.5",
+                completed && "text-green-500"
+              )} />
+            </Button>
             <Button
               variant="ghost"
               size="icon"

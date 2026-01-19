@@ -26,6 +26,19 @@ export function useToastActions() {
     });
   };
 
+  const showCompleted = (isCompleted: boolean, onUndo?: () => void) => {
+    toast.success(isCompleted ? "Marked as complete" : "Marked as incomplete", {
+      description: isCompleted 
+        ? "Assignment removed from your lists" 
+        : "Assignment restored to your lists",
+      duration: 4000,
+      action: isCompleted && onUndo ? {
+        label: "Undo",
+        onClick: onUndo,
+      } : undefined,
+    });
+  };
+
   const showError = (message: string) => {
     toast.error("Something went wrong", {
       description: message,
@@ -37,6 +50,7 @@ export function useToastActions() {
     showPinned,
     showRefreshed,
     showFocusMode,
+    showCompleted,
     showError,
   };
 }

@@ -17,7 +17,7 @@ import { cn } from "@/lib/utils";
 type ViewMode = "agenda" | "month";
 
 export default function CalendarPage() {
-  const { refreshInterval } = useSettings();
+  const { refreshInterval, completedAssignments } = useSettings();
   const [viewMode, setViewMode] = useState<ViewMode>("agenda");
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
@@ -38,7 +38,7 @@ export default function CalendarPage() {
     refetchInterval: refreshInterval,
   });
 
-  // Combine all assignments
+  // Combine all assignments and filter out completed
   const allAssignments = useMemo(() => {
     if (!upcoming) return [];
     return [
@@ -46,8 +46,10 @@ export default function CalendarPage() {
       ...upcoming.due_today,
       ...upcoming.due_soon,
       ...upcoming.this_week,
-    ].sort((a, b) => new Date(a.due_at).getTime() - new Date(b.due_at).getTime());
-  }, [upcoming]);
+    ]
+      .filter(a => !completedAssignments.includes(a.id))
+      .sort((a, b) => new Date(a.due_at).getTime() - new Date(b.due_at).getTime());
+  }, [upcoming, completedAssignments]);
 
   // Group by date for agenda view
   const groupedByDate = useMemo(() => {

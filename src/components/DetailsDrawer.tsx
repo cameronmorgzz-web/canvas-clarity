@@ -1,6 +1,5 @@
 import { format, isPast, isToday, isTomorrow } from "date-fns";
-import { X, ExternalLink, Calendar, BookOpen, Award, Pin } from "lucide-react";
-import { motion } from "framer-motion";
+import { ExternalLink, Calendar, BookOpen, Award, Pin, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Assignment } from "@/types/canvas";
 import { StatusBadge } from "./StatusBadge";
@@ -22,19 +21,29 @@ interface DetailsDrawerProps {
 }
 
 export function DetailsDrawer({ assignment, open, onClose }: DetailsDrawerProps) {
-  const { isPinned, togglePinAssignment } = useSettings();
-  const { showPinned } = useToastActions();
+  const { isPinned, togglePinAssignment, isCompleted, toggleCompleteAssignment, uncompleteAssignment } = useSettings();
+  const { showPinned, showCompleted } = useToastActions();
   
   if (!assignment) return null;
 
   const dueDate = new Date(assignment.due_at);
   const isOverdue = isPast(dueDate) && assignment.submission_state !== "submitted" && assignment.submission_state !== "graded";
   const pinned = isPinned(assignment.id);
+  const completed = isCompleted(assignment.id);
 
   const handlePin = () => {
     const newPinned = !pinned;
     togglePinAssignment(assignment.id);
     showPinned(newPinned);
+  };
+
+  const handleComplete = () => {
+    const newCompleted = !completed;
+    toggleCompleteAssignment(assignment.id);
+    showCompleted(newCompleted, newCompleted ? () => uncompleteAssignment(assignment.id) : undefined);
+    if (newCompleted) {
+      onClose();
+    }
   };
 
   const formatDueDate = () => {
@@ -64,8 +73,17 @@ export function DetailsDrawer({ assignment, open, onClose }: DetailsDrawerProps)
                 status={assignment.status} 
                 submissionState={assignment.submission_state} 
               />
+              {completed && (
+                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-2xs font-medium bg-green-500/10 text-green-500 border border-green-500/20">
+                  <Check className="w-2.5 h-2.5" />
+                  Done
+                </span>
+              )}
             </div>
-            <SheetTitle className="text-xl font-semibold text-foreground leading-tight">
+            <SheetTitle className={cn(
+              "text-xl font-semibold text-foreground leading-tight",
+              completed && "line-through text-muted-foreground"
+            )}>
               {assignment.name}
             </SheetTitle>
           </SheetHeader>
@@ -76,18 +94,18 @@ export function DetailsDrawer({ assignment, open, onClose }: DetailsDrawerProps)
           <div className="flex items-start gap-3">
             <div className={cn(
               "w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0",
-              isOverdue ? "bg-status-overdue-bg" : "bg-muted/50"
+              isOverdue && !completed ? "bg-status-overdue-bg" : "bg-muted/50"
             )}>
               <Calendar className={cn(
                 "w-4 h-4",
-                isOverdue ? "text-status-overdue" : "text-muted-foreground"
+                isOverdue && !completed ? "text-status-overdue" : "text-muted-foreground"
               )} />
             </div>
             <div>
               <div className="text-xs text-muted-foreground mb-0.5">Due</div>
               <div className={cn(
                 "font-medium text-sm",
-                isOverdue ? "text-status-overdue" : "text-foreground"
+                isOverdue && !completed ? "text-status-overdue" : "text-foreground"
               )}>
                 {formatDueDate()}
               </div>
@@ -136,6 +154,18 @@ export function DetailsDrawer({ assignment, open, onClose }: DetailsDrawerProps)
         {/* Action Buttons */}
         <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-border bg-card/80 backdrop-blur-sm">
           <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleComplete}
+              className={cn(
+                "flex-shrink-0",
+                completed && "bg-green-500/10 border-green-500/30 text-green-500"
+              )}
+            >
+              <Check className={cn("w-4 h-4 mr-1.5", completed && "fill-current")} />
+              {completed ? "Done" : "Complete"}
+            </Button>
             <Button
               variant="outline"
               size="sm"
