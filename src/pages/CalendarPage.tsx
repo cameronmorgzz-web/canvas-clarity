@@ -1,10 +1,11 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, addMonths, subMonths, isToday, startOfWeek, addDays } from "date-fns";
-import { ChevronLeft, ChevronRight, List, Grid3X3, CalendarDays, Plus, ExternalLink } from "lucide-react";
+import { ChevronLeft, ChevronRight, List, Grid3X3, CalendarDays } from "lucide-react";
 import { fetchUpcoming } from "@/lib/api";
 import { useSettings } from "@/hooks/use-settings";
+import { useCalendarKeyboard } from "@/hooks/use-calendar-keyboard";
 import type { Assignment } from "@/types/canvas";
 import { AssignmentCardRow } from "@/components/AssignmentCardRow";
 import { DetailsDrawer } from "@/components/DetailsDrawer";
@@ -21,7 +22,7 @@ const containerVariants = {
   show: {
     opacity: 1,
     transition: {
-      staggerChildren: 0.03,
+      staggerChildren: 0.02,
     },
   },
 };
@@ -45,7 +46,6 @@ export default function CalendarPage() {
   const [drawerOpen, setDrawerOpen] = useState(false);
 
   const monthStart = startOfMonth(currentMonth);
-  const monthEnd = endOfMonth(currentMonth);
 
   const { 
     data: upcoming, 
@@ -94,11 +94,18 @@ export default function CalendarPage() {
     return days;
   }, [monthStart]);
 
+  // Keyboard navigation
+  const { containerProps, focusedIndex } = useCalendarKeyboard({
+    calendarDays,
+    selectedDate,
+    onSelectDate: setSelectedDate,
+  });
+
   // Get assignments for a specific date
-  const getAssignmentsForDate = (date: Date) => {
+  const getAssignmentsForDate = useCallback((date: Date) => {
     const dateKey = format(date, "yyyy-MM-dd");
     return groupedByDate[dateKey] || [];
-  };
+  }, [groupedByDate]);
 
   const handleAssignmentClick = (assignment: Assignment) => {
     setSelectedAssignment(assignment);
@@ -113,6 +120,14 @@ export default function CalendarPage() {
   const isCurrentMonth = (date: Date) => {
     return date.getMonth() === currentMonth.getMonth();
   };
+
+  const handlePrevMonth = useCallback(() => {
+    setCurrentMonth(prev => subMonths(prev, 1));
+  }, []);
+
+  const handleNextMonth = useCallback(() => {
+    setCurrentMonth(prev => addMonths(prev, 1));
+  }, []);
 
   return (
     <div className="max-w-3xl mx-auto space-y-4">
@@ -171,7 +186,7 @@ export default function CalendarPage() {
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}
+                onClick={handlePrevMonth}
                 className="h-8 w-8 rounded-lg"
               >
                 <ChevronLeft className="w-4 h-4" />
@@ -187,7 +202,7 @@ export default function CalendarPage() {
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}
+                onClick={handleNextMonth}
                 className="h-8 w-8 rounded-lg"
               >
                 <ChevronRight className="w-4 h-4" />
@@ -208,21 +223,22 @@ export default function CalendarPage() {
           </div>
 
           {/* Day Headers */}
-          <div className="grid grid-cols-7 gap-1 mb-1">
+          <div className="grid grid-cols-7 gap-1 mb-1" role="row">
             {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map((day) => (
-              <div key={day} className="text-center text-2xs text-muted-foreground py-1.5 font-semibold uppercase tracking-wider">
+              <div key={day} role="columnheader" className="text-center text-2xs text-muted-foreground py-1.5 font-semibold uppercase tracking-wider">
                 {day}
               </div>
             ))}
           </div>
 
-          {/* Calendar Grid */}
+          {/* Calendar Grid with Keyboard Navigation */}
           <motion.div 
             key={format(currentMonth, "yyyy-MM")}
             variants={containerVariants}
             initial="hidden"
             animate="show"
-            className="grid grid-cols-7 gap-1"
+            className="grid grid-cols-7 gap-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background rounded-lg"
+            {...containerProps}
           >
             {calendarDays.map((day, index) => {
               const assignments = getAssignmentsForDate(day);
@@ -230,6 +246,7 @@ export default function CalendarPage() {
               const isTodayDate = isToday(day);
               const isOutsideMonth = !isCurrentMonth(day);
               const hasOverdue = assignments.some(a => new Date(a.due_at) < new Date());
+              const isFocused = focusedIndex === index;
               
               return (
                 <motion.button
@@ -238,13 +255,18 @@ export default function CalendarPage() {
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                   onClick={() => setSelectedDate(day)}
+                  role="gridcell"
+                  aria-selected={isSelected}
+                  aria-label={`${format(day, "EEEE, MMMM d, yyyy")}${assignments.length > 0 ? `, ${assignments.length} assignments` : ""}`}
                   className={cn(
                     "calendar-cell aspect-square p-1 rounded-lg transition-all duration-150",
                     "flex flex-col items-center justify-start gap-0.5",
                     "relative overflow-hidden",
+                    "focus:outline-none",
                     isOutsideMonth && "opacity-30",
                     isTodayDate && "calendar-cell-today",
                     isSelected && "ring-2 ring-primary ring-offset-2 ring-offset-background",
+                    isFocused && !isSelected && "ring-2 ring-primary/50 ring-offset-1 ring-offset-background",
                     !isTodayDate && !isSelected && "hover:bg-muted/50"
                   )}
                   style={{
@@ -269,7 +291,7 @@ export default function CalendarPage() {
                           key={i}
                           initial={{ scale: 0 }}
                           animate={{ scale: 1 }}
-                          transition={{ delay: index * 0.01 + i * 0.05 }}
+                          transition={{ delay: index * 0.005 + i * 0.03 }}
                           className="event-dot"
                           style={{ 
                             backgroundColor: a.course_color || "hsl(var(--primary))",
@@ -296,6 +318,13 @@ export default function CalendarPage() {
             })}
           </motion.div>
 
+          {/* Keyboard hints */}
+          <div className="mt-3 pt-3 border-t border-border/50 flex items-center justify-center gap-4 text-[10px] text-muted-foreground/60">
+            <span>↑↓←→ Navigate</span>
+            <span>Enter Select</span>
+            <span>Home/End Week</span>
+          </div>
+
           {/* Selected Date Assignments */}
           <AnimatePresence mode="wait">
             {selectedDate && (
@@ -321,7 +350,7 @@ export default function CalendarPage() {
                     animate="show"
                     className="space-y-1.5"
                   >
-                    {getAssignmentsForDate(selectedDate).map((assignment, index) => (
+                    {getAssignmentsForDate(selectedDate).map((assignment) => (
                       <motion.div key={assignment.id} variants={itemVariants}>
                         <AssignmentCardRow
                           assignment={assignment}
@@ -408,7 +437,7 @@ export default function CalendarPage() {
                             key={assignment.id}
                             initial={{ opacity: 0, x: -16 }}
                             animate={{ opacity: 1, x: 0 }}
-                            transition={{ delay: groupIndex * 0.05 + index * 0.03 }}
+                            transition={{ delay: groupIndex * 0.03 + index * 0.02 }}
                           >
                             <AssignmentCardRow
                               assignment={assignment}

@@ -1,12 +1,12 @@
 import { motion } from "framer-motion";
 import { format, formatDistanceToNow, isToday, isTomorrow, isPast } from "date-fns";
-import { ExternalLink, ChevronRight, Pin, Check, Clock3 } from "lucide-react";
+import { ExternalLink, ChevronRight, Pin, Clock3 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Assignment } from "@/types/canvas";
 import { StatusBadge } from "./StatusBadge";
 import { CoursePill } from "./CoursePill";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
+import { AnimatedCheckbox } from "@/components/ui/animated-checkbox";
 import { useSettings } from "@/hooks/use-settings";
 import { useToastActions } from "@/hooks/use-toast-actions";
 
@@ -51,9 +51,7 @@ export function AssignmentCardRow({
     showPinned(newPinned);
   };
 
-  const handleComplete = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    const newCompleted = !completed;
+  const handleCheckboxChange = (newCompleted: boolean) => {
     toggleCompleteAssignment(assignment.id);
     showCompleted(newCompleted, newCompleted ? () => uncompleteAssignment(assignment.id) : undefined);
   };
@@ -67,7 +65,10 @@ export function AssignmentCardRow({
       initial={{ opacity: 0, y: 4 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.15, ease: [0.25, 0.1, 0.25, 1] }}
-      whileHover={{ y: -1 }}
+      whileHover={{ 
+        y: -1,
+        transition: { duration: 0.1 }
+      }}
       whileTap={{ scale: 0.998 }}
       className={cn(
         "card-interactive cursor-pointer group relative",
@@ -82,19 +83,12 @@ export function AssignmentCardRow({
       onKeyDown={(e) => e.key === "Enter" && onClick?.()}
     >
       <div className="flex items-center gap-2.5">
-        {/* Inline Checkbox */}
+        {/* Animated Checkbox */}
         <div onClick={handleCheckboxClick} className="shrink-0">
-          <Checkbox 
+          <AnimatedCheckbox 
             checked={completed}
-            onCheckedChange={() => {
-              const newCompleted = !completed;
-              toggleCompleteAssignment(assignment.id);
-              showCompleted(newCompleted, newCompleted ? () => uncompleteAssignment(assignment.id) : undefined);
-            }}
-            className={cn(
-              "h-4 w-4 rounded-[4px] border-border-bright transition-colors",
-              completed && "bg-green-500/20 border-green-500/40 data-[state=checked]:bg-green-500 data-[state=checked]:border-green-500"
-            )}
+            onCheckedChange={handleCheckboxChange}
+            size={isCompact ? "sm" : "default"}
           />
         </div>
 
@@ -147,7 +141,13 @@ export function AssignmentCardRow({
               size="sm"
             />
             {pinned && (
-              <Pin className="w-2.5 h-2.5 text-primary fill-primary" />
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ type: "spring", stiffness: 500, damping: 25 }}
+              >
+                <Pin className="w-2.5 h-2.5 text-primary fill-primary" />
+              </motion.div>
             )}
           </div>
         </div>
