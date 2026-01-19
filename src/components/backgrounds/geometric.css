@@ -1,8 +1,8 @@
 /* Geometric Background - GPU-accelerated CSS animations */
 
 .geometric-container {
-  contain: strict;
-  will-change: auto;
+  position: absolute;
+  inset: 0;
 }
 
 /* Wave SVG */
@@ -10,7 +10,7 @@
   position: absolute;
   width: 100%;
   height: 100%;
-  opacity: 0.04;
+  opacity: 0.15;
 }
 
 .geometric-waves.geometric-parallax {
@@ -40,7 +40,7 @@
 /* Floating shapes */
 .geometric-shape {
   position: absolute;
-  border: 1px solid hsl(var(--primary) / 0.05);
+  border: 1px solid hsl(var(--primary) / 0.15);
   will-change: transform;
   transform: translateZ(0);
 }
@@ -76,10 +76,10 @@
 .geometric-grid {
   position: absolute;
   inset: 0;
-  opacity: 0.012;
+  opacity: 0.04;
   background-image:
-    linear-gradient(to right, hsl(var(--primary) / 0.15) 1px, transparent 1px),
-    linear-gradient(to bottom, hsl(var(--primary) / 0.15) 1px, transparent 1px);
+    linear-gradient(to right, hsl(var(--primary) / 0.2) 1px, transparent 1px),
+    linear-gradient(to bottom, hsl(var(--primary) / 0.2) 1px, transparent 1px);
   background-size: 80px 80px;
 }
 

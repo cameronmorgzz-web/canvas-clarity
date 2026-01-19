@@ -162,8 +162,8 @@ export const ParticleBackground = memo(function ParticleBackground({ cursorGlow 
       // Update spatial grid after all movements
       updateSpatialGrid(particles);
 
-      // Draw all particles first (single color setting)
-      ctx.fillStyle = `rgba(${color}, 0.3)`;
+      // Draw all particles first - more visible
+      ctx.fillStyle = `rgba(${color}, 0.5)`;
       for (const p of particles) {
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
@@ -194,7 +194,7 @@ export const ParticleBackground = memo(function ParticleBackground({ cursorGlow 
 
             if (distSq < 14400) { // 120^2
               const dist = Math.sqrt(distSq);
-              const alpha = 0.04 * (1 - dist / 120);
+              const alpha = 0.08 * (1 - dist / 120);
               ctx.strokeStyle = `rgba(${color}, ${alpha})`;
               ctx.beginPath();
               ctx.moveTo(p.x, p.y);
@@ -208,11 +208,11 @@ export const ParticleBackground = memo(function ParticleBackground({ cursorGlow 
 
       // Cursor glow effect (simplified)
       if (cursorGlow && mouse.x && mouse.y) {
-        const gradient = ctx.createRadialGradient(mouse.x, mouse.y, 0, mouse.x, mouse.y, 120);
-        gradient.addColorStop(0, `rgba(${color}, 0.06)`);
+        const gradient = ctx.createRadialGradient(mouse.x, mouse.y, 0, mouse.x, mouse.y, 150);
+        gradient.addColorStop(0, `rgba(${color}, 0.15)`);
         gradient.addColorStop(1, `rgba(${color}, 0)`);
         ctx.fillStyle = gradient;
-        ctx.fillRect(mouse.x - 120, mouse.y - 120, 240, 240);
+        ctx.fillRect(mouse.x - 150, mouse.y - 150, 300, 300);
       }
 
       animationRef.current = requestAnimationFrame(animate);
@@ -252,11 +252,7 @@ export const ParticleBackground = memo(function ParticleBackground({ cursorGlow 
     <canvas
       ref={canvasRef}
       className="absolute inset-0 pointer-events-none"
-      style={{ 
-        opacity: 0.6,
-        contain: "strict",
-        willChange: "auto",
-      }}
+      style={{ opacity: 0.8 }}
     />
   );
 });

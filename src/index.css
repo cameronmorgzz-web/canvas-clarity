@@ -143,9 +143,14 @@
 
   body {
     @apply text-foreground;
-    background: hsl(var(--background));
+    background: transparent;
     min-height: 100vh;
     overflow-x: hidden;
+  }
+  
+  /* HTML provides the base background */
+  html {
+    background: hsl(var(--background));
   }
 
   /* Noise texture is now handled by DynamicBackground TextureOverlay */
