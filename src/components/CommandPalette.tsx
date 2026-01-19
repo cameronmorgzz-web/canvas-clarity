@@ -16,6 +16,7 @@ import {
   Command,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { formatCourseCode } from "@/lib/format";
 import { useSettings } from "@/hooks/use-settings";
 import { fetchUpcoming, fetchCourses } from "@/lib/api";
 import type { Assignment, Course } from "@/types/canvas";
@@ -182,7 +183,7 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps) {
           id: `course-${course.id}`,
           type: "course",
           label: course.name,
-          description: course.course_code,
+          description: formatCourseCode(course.course_code),
           icon: <BookOpen className="w-4 h-4" />,
           action: () => { 
             navigate(`/courses/${course.id}`); 

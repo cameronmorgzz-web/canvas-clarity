@@ -1,7 +1,7 @@
 import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
-import { Megaphone, Pin, Sparkles, GraduationCap } from "lucide-react";
+import { Megaphone, Pin, Sparkles, GraduationCap, Calendar } from "lucide-react";
 import { fetchUpcoming, fetchAnnouncements } from "@/lib/api";
 import { useSettings } from "@/hooks/use-settings";
 import type { Assignment } from "@/types/canvas";
@@ -122,9 +122,6 @@ export default function HomePage() {
           {upcomingLoading ? <SkeletonWeekStrip /> : <WeekStrip assignments={weekItems} />}
         </div>
         
-        {/* Timetable - compact view */}
-        <TimetableCard compact className="mb-4" />
-        
         {/* Focus Summary Chips - clickable filters */}
         {!upcomingLoading && (
           <FocusSummaryCard
@@ -141,6 +138,15 @@ export default function HomePage() {
       {upcomingError && (
         <ErrorBanner message="Couldn't load assignments" onRetry={() => refetchUpcoming()} />
       )}
+
+      {/* Today's Timetable - Full Section */}
+      <CollapsibleSection
+        title="Today's Schedule"
+        icon={<Calendar className="w-3.5 h-3.5 text-primary" />}
+        defaultOpen={true}
+      >
+        <TimetableCard />
+      </CollapsibleSection>
 
       {/* Filtered View */}
       {!showAllSections && filteredAssignments && (
