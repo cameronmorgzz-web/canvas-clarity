@@ -2,3 +2,6 @@ project_id = "imszbzblkbgqoencjwyh"
 
 [functions.assistant]
 verify_jwt = false
+
+[functions.canvas-data]
+verify_jwt = false
