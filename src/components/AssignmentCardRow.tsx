@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { format, formatDistanceToNow, isToday, isTomorrow, isPast } from "date-fns";
 import { ExternalLink, ChevronRight, Pin, Clock3 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { formatCourseName } from "@/lib/format";
 import type { Assignment } from "@/types/canvas";
 import { StatusBadge } from "./StatusBadge";
 import { CoursePill } from "./CoursePill";
@@ -131,7 +132,7 @@ export function AssignmentCardRow({
           {/* Row 2: Course + Status + Indicators */}
           <div className="flex items-center gap-1.5">
             <CoursePill 
-              name={assignment.course_name} 
+              name={formatCourseName(assignment.course_name)} 
               color={assignment.course_color}
               size="sm"
             />

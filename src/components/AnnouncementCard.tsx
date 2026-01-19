@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { formatDistanceToNow } from "date-fns";
 import { ExternalLink } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { formatCourseName } from "@/lib/format";
 import type { Announcement } from "@/types/canvas";
 import { CoursePill } from "./CoursePill";
 import { staggerItem, cardHover, cardTap } from "@/lib/animations";
@@ -37,7 +38,7 @@ export function AnnouncementCard({ announcement, className }: AnnouncementCardPr
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-2">
             <CoursePill 
-              name={announcement.course_name} 
+              name={formatCourseName(announcement.course_name)} 
               color={announcement.course_color} 
             />
             <span className="text-xs text-muted-foreground">

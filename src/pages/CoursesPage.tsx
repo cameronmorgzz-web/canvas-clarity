@@ -12,6 +12,7 @@ import { ErrorBanner } from "@/components/ErrorBanner";
 import { SkeletonList, SkeletonCard } from "@/components/SkeletonCard";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { formatCourseCode } from "@/lib/format";
 
 function CourseCard({ course, upcomingCount, nextDue }: { 
   course: Course; 
@@ -33,7 +34,7 @@ function CourseCard({ course, upcomingCount, nextDue }: {
           <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors truncate mb-0.5">
             {course.name}
           </h3>
-          <p className="text-xs text-muted-foreground mb-3">{course.course_code}</p>
+          <p className="text-xs text-muted-foreground mb-3">{formatCourseCode(course.course_code)}</p>
           
           <div className="flex items-center gap-3 text-xs">
             <span className={cn(
@@ -146,7 +147,7 @@ export default function CoursesPage() {
                 className="w-3 h-3 rounded-full"
                 style={{ backgroundColor: course.color }}
               />
-              <span className="text-xs text-muted-foreground">{course.course_code}</span>
+              <span className="text-xs text-muted-foreground">{formatCourseCode(course.course_code)}</span>
             </div>
             <h1 className="text-3xl font-bold text-foreground tracking-tight">{course.name}</h1>
           </div>
