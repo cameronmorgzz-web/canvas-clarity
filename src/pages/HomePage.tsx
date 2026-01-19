@@ -12,6 +12,7 @@ import { DetailsDrawer } from "@/components/DetailsDrawer";
 import { EmptyStateCard } from "@/components/EmptyStateCard";
 import { ErrorBanner } from "@/components/ErrorBanner";
 import { SkeletonList, SkeletonWeekStrip } from "@/components/SkeletonCard";
+import { CollapsibleSection } from "@/components/CollapsibleSection";
 import { cn } from "@/lib/utils";
 
 export default function HomePage() {
@@ -93,22 +94,42 @@ export default function HomePage() {
         
         {/* Focus Summary Chips */}
         {!upcomingLoading && (
-          <div className="flex flex-wrap gap-1.5 mt-4">
+          <motion.div 
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1, duration: 0.2 }}
+            className="flex flex-wrap gap-1.5 mt-4"
+          >
             {overdueCount > 0 && (
-              <span className="focus-chip focus-chip-urgent">
+              <motion.span 
+                className="focus-chip focus-chip-urgent"
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ type: "spring", stiffness: 400, damping: 20 }}
+              >
                 <AlertTriangle className="w-2.5 h-2.5" />
                 {overdueCount} overdue
-              </span>
+              </motion.span>
             )}
-            <span className={cn("focus-chip", todayCount > 0 && "focus-chip-today")}>
+            <motion.span 
+              className={cn("focus-chip", todayCount > 0 && "focus-chip-today")}
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ type: "spring", stiffness: 400, damping: 20, delay: 0.05 }}
+            >
               <Clock className="w-2.5 h-2.5" />
               {todayCount} due today
-            </span>
-            <span className="focus-chip">
+            </motion.span>
+            <motion.span 
+              className="focus-chip"
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ type: "spring", stiffness: 400, damping: 20, delay: 0.1 }}
+            >
               <CalendarDays className="w-2.5 h-2.5" />
               {weekCount} this week
-            </span>
-          </div>
+            </motion.span>
+          </motion.div>
         )}
       </motion.div>
 
@@ -118,56 +139,42 @@ export default function HomePage() {
 
       {/* Pinned Items */}
       {pinnedItems.length > 0 && (
-        <motion.section
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.03, duration: 0.2 }}
+        <CollapsibleSection
+          title="Pinned"
+          icon={<Pin className="w-3.5 h-3.5 text-primary" />}
+          defaultOpen={true}
         >
-          <div className="flex items-center gap-1.5 mb-2">
-            <Pin className="w-3.5 h-3.5 text-primary" />
-            <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Pinned</h2>
-          </div>
           <div className="space-y-1.5">
             {pinnedItems.map((a) => (
               <AssignmentCardRow key={a.id} assignment={a} onClick={() => handleAssignmentClick(a)} />
             ))}
           </div>
-        </motion.section>
+        </CollapsibleSection>
       )}
 
       {/* Overdue Section */}
       {!upcomingLoading && overdueItems.length > 0 && (
-        <motion.section
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.05, duration: 0.2 }}
+        <CollapsibleSection
+          title="Overdue"
+          icon={<AlertTriangle className="w-3.5 h-3.5 text-status-overdue" />}
+          badge={<span className="status-overdue">{overdueItems.length}</span>}
+          defaultOpen={true}
         >
-          <div className="flex items-center gap-1.5 mb-2">
-            <AlertTriangle className="w-3.5 h-3.5 text-status-overdue" />
-            <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Overdue</h2>
-            <span className="status-overdue ml-1">{overdueItems.length}</span>
-          </div>
           <div className="space-y-1.5">
             {overdueItems.map((a) => (
               <AssignmentCardRow key={a.id} assignment={a} onClick={() => handleAssignmentClick(a)} />
             ))}
           </div>
-        </motion.section>
+        </CollapsibleSection>
       )}
 
       {/* Due Today */}
-      <motion.section
-        initial={{ opacity: 0, y: 12 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.08, duration: 0.2 }}
+      <CollapsibleSection
+        title="Due Today"
+        icon={<Clock className="w-3.5 h-3.5 text-status-today" />}
+        badge={!upcomingLoading && <span className="status-today">{todayItems.length}</span>}
+        defaultOpen={true}
       >
-        <div className="flex items-center gap-1.5 mb-2">
-          <Clock className="w-3.5 h-3.5 text-status-today" />
-          <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Due Today</h2>
-          {!upcomingLoading && (
-            <span className="status-today ml-1">{todayItems.length}</span>
-          )}
-        </div>
         {upcomingLoading ? (
           <SkeletonList count={2} />
         ) : todayItems.length > 0 ? (
@@ -179,19 +186,15 @@ export default function HomePage() {
         ) : (
           <EmptyStateCard type="caught-up" title="Nothing due today" />
         )}
-      </motion.section>
+      </CollapsibleSection>
 
       {/* Next Up */}
-      <motion.section
-        initial={{ opacity: 0, y: 12 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.1, duration: 0.2 }}
+      <CollapsibleSection
+        title="Next Up"
+        icon={<Clock className="w-3.5 h-3.5 text-status-soon" />}
+        badge={<span className="text-[10px] text-muted-foreground">(48h)</span>}
+        defaultOpen={true}
       >
-        <div className="flex items-center gap-1.5 mb-2">
-          <Clock className="w-3.5 h-3.5 text-status-soon" />
-          <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Next Up</h2>
-          <span className="text-[10px] text-muted-foreground">(48h)</span>
-        </div>
         {upcomingLoading ? (
           <SkeletonList count={2} />
         ) : soonItems.length > 0 ? (
@@ -203,34 +206,26 @@ export default function HomePage() {
         ) : (
           <EmptyStateCard type="no-items" description="Nothing due in the next 48 hours" />
         )}
-      </motion.section>
+      </CollapsibleSection>
 
       {/* This Week */}
-      <motion.section
-        initial={{ opacity: 0, y: 12 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.12, duration: 0.2 }}
+      <CollapsibleSection
+        title="This Week"
+        icon={<CalendarDays className="w-3.5 h-3.5 text-primary" />}
+        defaultOpen={true}
       >
-        <div className="flex items-center gap-1.5 mb-2">
-          <CalendarDays className="w-3.5 h-3.5 text-primary" />
-          <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">This Week</h2>
-        </div>
         <div className="card-matte p-3">
           {upcomingLoading ? <SkeletonWeekStrip /> : <WeekStrip assignments={weekItems} />}
         </div>
-      </motion.section>
+      </CollapsibleSection>
 
       {/* Announcements */}
       {showAnnouncements && (
-        <motion.section
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.14, duration: 0.2 }}
+        <CollapsibleSection
+          title="Announcements"
+          icon={<Megaphone className="w-3.5 h-3.5 text-primary" />}
+          defaultOpen={false}
         >
-          <div className="flex items-center gap-1.5 mb-2">
-            <Megaphone className="w-3.5 h-3.5 text-primary" />
-            <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Announcements</h2>
-          </div>
           {announcementsError && (
             <ErrorBanner message="Couldn't load announcements" onRetry={() => refetchAnnouncements()} />
           )}
@@ -243,7 +238,7 @@ export default function HomePage() {
           ) : (
             <EmptyStateCard type="no-items" title="No new announcements" />
           )}
-        </motion.section>
+        </CollapsibleSection>
       )}
 
       <DetailsDrawer assignment={selectedAssignment} open={drawerOpen} onClose={() => setDrawerOpen(false)} />
