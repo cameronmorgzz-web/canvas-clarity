@@ -49,7 +49,7 @@ export function SidebarNav({ collapsed, onToggle }: SidebarNavProps) {
       className={cn(
         "fixed left-0 top-0 bottom-0 z-40",
         "flex flex-col",
-        "bg-sidebar border-r border-sidebar-border",
+        "sidebar-glass border-r border-sidebar-border",
         "transition-opacity duration-200",
         focusMode && "hover:opacity-100"
       )}

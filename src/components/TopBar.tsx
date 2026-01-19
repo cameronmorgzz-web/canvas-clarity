@@ -62,13 +62,13 @@ export function TopBar({
 
   return (
     <header className={cn(
-      "h-14 glass",
+      "h-14 topbar-glass",
       "flex items-center justify-between gap-4 px-5",
       "sticky top-0 z-30",
       className
     )}>
       {/* Top gradient accent */}
-      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-primary/25 to-transparent" />
+      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
       
       {/* Search - Premium pill */}
       <form onSubmit={handleSearch} className="flex-1 max-w-md">
