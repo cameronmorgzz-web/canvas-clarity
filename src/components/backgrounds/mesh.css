@@ -1,0 +1,157 @@
+/* Mesh Background - GPU-accelerated CSS animations */
+
+.mesh-container {
+  contain: strict;
+  will-change: auto;
+}
+
+.mesh-blob {
+  position: absolute;
+  border-radius: 50%;
+  will-change: transform;
+  transform: translateZ(0);
+}
+
+/* Blob 1 - top left */
+.mesh-blob-1 {
+  top: -20%;
+  left: -10%;
+  width: 60%;
+  height: 70%;
+  opacity: 0.07;
+  background: radial-gradient(
+    circle at 30% 40%,
+    hsl(var(--primary)) 0%,
+    hsl(280 70% 50%) 50%,
+    transparent 70%
+  );
+  filter: blur(40px);
+  animation: mesh-drift-1 20s ease-in-out infinite;
+}
+
+/* Blob 2 - right side */
+.mesh-blob-2 {
+  top: 20%;
+  right: -15%;
+  width: 55%;
+  height: 65%;
+  opacity: 0.05;
+  background: radial-gradient(
+    circle at 60% 50%,
+    hsl(200 80% 50%) 0%,
+    hsl(var(--primary)) 50%,
+    transparent 70%
+  );
+  filter: blur(50px);
+  animation: mesh-drift-2 25s ease-in-out infinite;
+  animation-delay: 3s;
+}
+
+/* Blob 3 - bottom */
+.mesh-blob-3 {
+  bottom: -20%;
+  left: 20%;
+  width: 70%;
+  height: 60%;
+  opacity: 0.04;
+  background: radial-gradient(
+    circle at 50% 60%,
+    hsl(320 70% 50%) 0%,
+    hsl(260 60% 50%) 50%,
+    transparent 70%
+  );
+  filter: blur(60px);
+  animation: mesh-drift-3 30s ease-in-out infinite;
+  animation-delay: 8s;
+}
+
+/* Blob 4 - center */
+.mesh-blob-4 {
+  top: 50%;
+  left: 40%;
+  width: 40%;
+  height: 50%;
+  opacity: 0.03;
+  background: radial-gradient(
+    circle at center,
+    hsl(180 60% 50%) 0%,
+    hsl(var(--primary)) 60%,
+    transparent 80%
+  );
+  filter: blur(35px);
+  animation: mesh-rotate 40s linear infinite;
+}
+
+/* Color shift overlay */
+.mesh-color-shift {
+  position: absolute;
+  inset: 0;
+  mix-blend-mode: overlay;
+  animation: mesh-color-cycle 30s linear infinite;
+}
+
+/* Optimized keyframes */
+@keyframes mesh-drift-1 {
+  0%, 100% {
+    transform: translate(0, 0) scale(1) translateZ(0);
+  }
+  50% {
+    transform: translate(30px, 20px) scale(1.1) translateZ(0);
+  }
+}
+
+@keyframes mesh-drift-2 {
+  0%, 100% {
+    transform: translate(0, 0) scale(1) translateZ(0);
+  }
+  50% {
+    transform: translate(-25px, 25px) scale(0.95) translateZ(0);
+  }
+}
+
+@keyframes mesh-drift-3 {
+  0%, 100% {
+    transform: translate(0, 0) scale(1) translateZ(0);
+  }
+  50% {
+    transform: translate(20px, -30px) scale(1.08) translateZ(0);
+  }
+}
+
+@keyframes mesh-rotate {
+  0% {
+    transform: scale(1) rotate(0deg) translateZ(0);
+  }
+  50% {
+    transform: scale(0.9) rotate(180deg) translateZ(0);
+  }
+  100% {
+    transform: scale(1) rotate(360deg) translateZ(0);
+  }
+}
+
+@keyframes mesh-color-cycle {
+  0% {
+    background: linear-gradient(0deg, transparent, hsla(var(--primary) / 0.015), transparent);
+  }
+  25% {
+    background: linear-gradient(90deg, transparent, hsla(280 70% 50% / 0.015), transparent);
+  }
+  50% {
+    background: linear-gradient(180deg, transparent, hsla(200 80% 50% / 0.015), transparent);
+  }
+  75% {
+    background: linear-gradient(270deg, transparent, hsla(320 70% 50% / 0.015), transparent);
+  }
+  100% {
+    background: linear-gradient(360deg, transparent, hsla(var(--primary) / 0.015), transparent);
+  }
+}
+
+/* Reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  .mesh-blob,
+  .mesh-color-shift {
+    animation: none !important;
+  }
+}

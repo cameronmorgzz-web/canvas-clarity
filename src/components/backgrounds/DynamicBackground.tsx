@@ -11,6 +11,7 @@ export const DynamicBackground = memo(function DynamicBackground() {
     backgroundStyle, 
     textureStyle, 
     specialEffects,
+    performanceMode,
     reducedMotion 
   } = useVisualSettings();
   
@@ -26,48 +27,57 @@ export const DynamicBackground = memo(function DynamicBackground() {
   }, []);
   
   const shouldAnimate = !reducedMotion && !prefersReducedMotion;
+  
+  // In performance mode, only show static background
+  const showAnimatedBackground = shouldAnimate && performanceMode !== "performance";
+  
+  // In performance mode, skip texture overlay
+  const showTexture = shouldAnimate && performanceMode !== "performance";
 
   return (
-    <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
+    <div 
+      className="fixed inset-0 -z-10 overflow-hidden pointer-events-none"
+      style={{ contain: "strict" }}
+    >
       {/* Background style */}
-      {backgroundStyle === "aurora" && shouldAnimate && (
+      {backgroundStyle === "aurora" && showAnimatedBackground && (
         <AuroraBackground colorShift={specialEffects.colorShift} />
       )}
       
-      {backgroundStyle === "particles" && shouldAnimate && (
+      {backgroundStyle === "particles" && showAnimatedBackground && (
         <ParticleBackground cursorGlow={specialEffects.cursorGlow} />
       )}
       
-      {backgroundStyle === "mesh" && shouldAnimate && (
+      {backgroundStyle === "mesh" && showAnimatedBackground && (
         <MeshBackground colorShift={specialEffects.colorShift} />
       )}
       
-      {backgroundStyle === "geometric" && shouldAnimate && (
+      {backgroundStyle === "geometric" && showAnimatedBackground && (
         <GeometricBackground parallaxDepth={specialEffects.parallaxDepth} />
       )}
       
-      {/* Static fallback for no animation or "none" */}
-      {(backgroundStyle === "none" || !shouldAnimate) && (
+      {/* Static fallback for no animation, "none", or performance mode */}
+      {(backgroundStyle === "none" || !showAnimatedBackground) && (
         <div className="absolute inset-0">
           <div 
             className="absolute -top-[20%] -right-[10%] w-[60%] h-[60%] rounded-full opacity-[0.03]"
             style={{
               background: "radial-gradient(circle, hsl(var(--primary)) 0%, transparent 70%)",
-              filter: "blur(80px)",
+              filter: "blur(60px)",
             }}
           />
           <div 
             className="absolute -bottom-[30%] -left-[20%] w-[70%] h-[70%] rounded-full opacity-[0.025]"
             style={{
               background: "radial-gradient(circle, hsl(210 60% 50%) 0%, transparent 70%)",
-              filter: "blur(100px)",
+              filter: "blur(80px)",
             }}
           />
         </div>
       )}
       
       {/* Texture overlay */}
-      {shouldAnimate && <TextureOverlay style={textureStyle} />}
+      {showTexture && <TextureOverlay style={textureStyle} />}
       
       {/* Vignette effect */}
       <div 
