@@ -27,102 +27,171 @@ function checkRateLimit(ip: string): boolean {
   return true;
 }
 
-// Mock Canvas data - in production, these would be fetched from actual Canvas API
-const MOCK_COURSES = [
-  { id: "c1", name: "Calculus II", course_code: "MATH 202" },
-  { id: "c2", name: "Organic Chemistry", course_code: "CHEM 301" },
-  { id: "c3", name: "Modern Literature", course_code: "ENG 215" },
-  { id: "c4", name: "Data Structures", course_code: "CS 201" },
-];
-
-const MOCK_ASSIGNMENTS = [
-  {
-    id: "a1",
-    name: "Problem Set 4: Integration",
-    course_id: "c1",
-    course_name: "Calculus II",
-    due_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(), // 2 days ago
-    status: "overdue",
-    points_possible: 100,
-    html_url: "https://canvas.instructure.com/courses/c1/assignments/a1",
-  },
-  {
-    id: "a2",
-    name: "Lab Report: Synthesis",
-    course_id: "c2",
-    course_name: "Organic Chemistry",
-    due_at: new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString(), // 2 hours from now
-    status: "due_today",
-    points_possible: 50,
-    html_url: "https://canvas.instructure.com/courses/c2/assignments/a2",
-  },
-  {
-    id: "a3",
-    name: "Essay: Postmodern Themes",
-    course_id: "c3",
-    course_name: "Modern Literature",
-    due_at: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString(), // 3 days from now
-    status: "due_soon",
-    points_possible: 150,
-    html_url: "https://canvas.instructure.com/courses/c3/assignments/a3",
-  },
-  {
-    id: "a4",
-    name: "Binary Trees Implementation",
-    course_id: "c4",
-    course_name: "Data Structures",
-    due_at: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString(), // 5 days from now
-    status: "future",
-    points_possible: 100,
-    html_url: "https://canvas.instructure.com/courses/c4/assignments/a4",
-  },
-  {
-    id: "a5",
-    name: "Reading Quiz Ch. 8-10",
-    course_id: "c3",
-    course_name: "Modern Literature",
-    due_at: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000).toISOString(), // tomorrow
-    status: "due_soon",
-    points_possible: 25,
-    html_url: "https://canvas.instructure.com/courses/c3/assignments/a5",
-  },
-];
-
-const MOCK_ANNOUNCEMENTS = [
-  {
-    id: "n1",
-    title: "Office Hours Cancelled Friday",
-    course_id: "c1",
-    course_name: "Calculus II",
-    posted_at: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
-    message_preview: "Due to the department meeting, office hours on Friday are cancelled. Please email me if you have urgent questions.",
-    html_url: "https://canvas.instructure.com/courses/c1/announcements/n1",
-  },
-  {
-    id: "n2",
-    title: "Lab Safety Reminder",
-    course_id: "c2",
-    course_name: "Organic Chemistry",
-    posted_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-    message_preview: "Please remember to wear safety goggles at all times in the lab. We've had some close calls recently.",
-    html_url: "https://canvas.instructure.com/courses/c2/announcements/n2",
-  },
-  {
-    id: "n3",
-    title: "Guest Speaker Next Week",
-    course_id: "c3",
-    course_name: "Modern Literature",
-    posted_at: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
-    message_preview: "Award-winning author Sarah Mitchell will be speaking in our class next Tuesday. Attendance is mandatory.",
-    html_url: "https://canvas.instructure.com/courses/c3/announcements/n3",
-  },
-];
-
 interface Citation {
   type: "assignment" | "announcement" | "course";
   id: string;
   title: string;
   html_url: string;
+}
+
+interface CanvasCourse {
+  id: number;
+  name: string;
+  course_code: string;
+}
+
+interface CanvasAssignment {
+  id: number;
+  name: string;
+  course_id: number;
+  due_at: string | null;
+  points_possible: number;
+  html_url: string;
+  has_submitted_submissions?: boolean;
+  submission?: {
+    workflow_state?: string;
+    submitted_at?: string | null;
+  };
+}
+
+interface CanvasAnnouncement {
+  id: number;
+  title: string;
+  context_code: string;
+  posted_at: string;
+  message: string;
+  html_url: string;
+}
+
+// Helper to fetch from Canvas API
+async function canvasFetch<T>(endpoint: string, apiUrl: string, apiToken: string): Promise<T> {
+  const url = `${apiUrl}/api/v1${endpoint}`;
+  console.log(`Fetching Canvas API: ${url}`);
+  
+  const response = await fetch(url, {
+    headers: {
+      "Authorization": `Bearer ${apiToken}`,
+      "Content-Type": "application/json",
+    },
+  });
+  
+  if (!response.ok) {
+    const errorText = await response.text();
+    console.error(`Canvas API error (${response.status}): ${errorText}`);
+    throw new Error(`Canvas API error: ${response.status}`);
+  }
+  
+  return response.json();
+}
+
+// Fetch active courses
+async function fetchCourses(apiUrl: string, apiToken: string): Promise<CanvasCourse[]> {
+  try {
+    const courses = await canvasFetch<CanvasCourse[]>(
+      "/courses?enrollment_state=active&per_page=50",
+      apiUrl,
+      apiToken
+    );
+    return courses.filter(c => c.name && c.id);
+  } catch (error) {
+    console.error("Error fetching courses:", error);
+    return [];
+  }
+}
+
+// Fetch assignments from all courses (upcoming + recent)
+async function fetchAssignments(
+  courses: CanvasCourse[],
+  apiUrl: string,
+  apiToken: string
+): Promise<{ assignment: CanvasAssignment; courseName: string }[]> {
+  const now = new Date();
+  const twoWeeksAgo = new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000);
+  const twoWeeksFromNow = new Date(now.getTime() + 14 * 24 * 60 * 60 * 1000);
+  
+  const allAssignments: { assignment: CanvasAssignment; courseName: string }[] = [];
+  
+  // Fetch assignments from each course in parallel
+  const fetchPromises = courses.map(async (course) => {
+    try {
+      const assignments = await canvasFetch<CanvasAssignment[]>(
+        `/courses/${course.id}/assignments?per_page=50&include[]=submission&order_by=due_at`,
+        apiUrl,
+        apiToken
+      );
+      
+      return assignments
+        .filter(a => {
+          if (!a.due_at) return true; // Include undated assignments
+          const dueDate = new Date(a.due_at);
+          return dueDate >= twoWeeksAgo && dueDate <= twoWeeksFromNow;
+        })
+        .map(a => ({ assignment: a, courseName: course.name }));
+    } catch (error) {
+      console.error(`Error fetching assignments for course ${course.id}:`, error);
+      return [];
+    }
+  });
+  
+  const results = await Promise.all(fetchPromises);
+  results.forEach(r => allAssignments.push(...r));
+  
+  // Sort by due date
+  allAssignments.sort((a, b) => {
+    if (!a.assignment.due_at) return 1;
+    if (!b.assignment.due_at) return -1;
+    return new Date(a.assignment.due_at).getTime() - new Date(b.assignment.due_at).getTime();
+  });
+  
+  return allAssignments;
+}
+
+// Fetch announcements from all courses
+async function fetchAnnouncements(
+  courses: CanvasCourse[],
+  apiUrl: string,
+  apiToken: string
+): Promise<{ announcement: CanvasAnnouncement; courseName: string }[]> {
+  if (courses.length === 0) return [];
+  
+  try {
+    const contextCodes = courses.map(c => `course_${c.id}`).join("&context_codes[]=");
+    const announcements = await canvasFetch<CanvasAnnouncement[]>(
+      `/announcements?context_codes[]=${contextCodes}&per_page=20`,
+      apiUrl,
+      apiToken
+    );
+    
+    // Map course names
+    const courseMap = new Map(courses.map(c => [`course_${c.id}`, c.name]));
+    
+    return announcements.map(a => ({
+      announcement: a,
+      courseName: courseMap.get(a.context_code) || "Unknown Course",
+    }));
+  } catch (error) {
+    console.error("Error fetching announcements:", error);
+    return [];
+  }
+}
+
+// Determine assignment status
+function getAssignmentStatus(assignment: CanvasAssignment): string {
+  const now = new Date();
+  
+  if (!assignment.due_at) return "no_due_date";
+  
+  const dueDate = new Date(assignment.due_at);
+  const submitted = assignment.submission?.submitted_at;
+  
+  if (submitted) return "submitted";
+  if (dueDate < now) return "overdue";
+  
+  const hoursUntilDue = (dueDate.getTime() - now.getTime()) / (1000 * 60 * 60);
+  if (hoursUntilDue <= 24) return "due_today";
+  if (hoursUntilDue <= 72) return "due_soon";
+  
+  return "future";
 }
 
 serve(async (req) => {
@@ -142,12 +211,23 @@ serve(async (req) => {
       );
     }
 
-    // Get OpenAI API key
+    // Get API keys
     const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY");
+    const CANVAS_API_URL = Deno.env.get("CANVAS_API_URL");
+    const CANVAS_API_TOKEN = Deno.env.get("CANVAS_API_TOKEN");
+    
     if (!OPENAI_API_KEY) {
       console.error("OPENAI_API_KEY is not configured");
       return new Response(
         JSON.stringify({ error: "AI service is not configured" }),
+        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+    
+    if (!CANVAS_API_URL || !CANVAS_API_TOKEN) {
+      console.error("Canvas API credentials are not configured");
+      return new Response(
+        JSON.stringify({ error: "Canvas integration is not configured" }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
@@ -164,20 +244,61 @@ serve(async (req) => {
 
     console.log(`Processing assistant request: "${message.substring(0, 100)}..."`);
 
-    // Filter data based on context (range)
-    const now = new Date();
-    let filteredAssignments = [...MOCK_ASSIGNMENTS];
+    // Fetch real Canvas data
+    console.log("Fetching Canvas data...");
+    const courses = await fetchCourses(CANVAS_API_URL, CANVAS_API_TOKEN);
+    console.log(`Fetched ${courses.length} courses`);
     
+    const [assignmentsData, announcementsData] = await Promise.all([
+      fetchAssignments(courses, CANVAS_API_URL, CANVAS_API_TOKEN),
+      fetchAnnouncements(courses, CANVAS_API_URL, CANVAS_API_TOKEN),
+    ]);
+    
+    console.log(`Fetched ${assignmentsData.length} assignments, ${announcementsData.length} announcements`);
+
+    // Transform to simplified format for the AI
+    const now = new Date();
+    
+    const formattedCourses = courses.map(c => ({
+      id: String(c.id),
+      name: c.name,
+      course_code: c.course_code,
+    }));
+    
+    let formattedAssignments = assignmentsData.map(({ assignment, courseName }) => ({
+      id: String(assignment.id),
+      name: assignment.name,
+      course_id: String(assignment.course_id),
+      course_name: courseName,
+      due_at: assignment.due_at,
+      status: getAssignmentStatus(assignment),
+      points_possible: assignment.points_possible,
+      html_url: assignment.html_url,
+    }));
+    
+    const formattedAnnouncements = announcementsData.map(({ announcement, courseName }) => ({
+      id: String(announcement.id),
+      title: announcement.title,
+      course_id: announcement.context_code.replace("course_", ""),
+      course_name: courseName,
+      posted_at: announcement.posted_at,
+      message_preview: announcement.message.replace(/<[^>]*>/g, "").substring(0, 200),
+      html_url: announcement.html_url,
+    }));
+
+    // Filter data based on context (range)
     if (context?.range === "today") {
       const todayEnd = new Date(now);
       todayEnd.setHours(23, 59, 59, 999);
-      filteredAssignments = MOCK_ASSIGNMENTS.filter(a => {
+      formattedAssignments = formattedAssignments.filter(a => {
+        if (!a.due_at) return false;
         const dueDate = new Date(a.due_at);
         return dueDate <= todayEnd || a.status === "overdue";
       });
     } else if (context?.range === "week") {
       const weekEnd = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
-      filteredAssignments = MOCK_ASSIGNMENTS.filter(a => {
+      formattedAssignments = formattedAssignments.filter(a => {
+        if (!a.due_at) return false;
         const dueDate = new Date(a.due_at);
         return dueDate <= weekEnd || a.status === "overdue";
       });
@@ -185,20 +306,20 @@ serve(async (req) => {
 
     // Filter by course if specified
     if (context?.courseId) {
-      filteredAssignments = filteredAssignments.filter(a => a.course_id === context.courseId);
+      formattedAssignments = formattedAssignments.filter(a => a.course_id === context.courseId);
     }
 
     // Get recent announcements (last 7 days)
     const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-    const recentAnnouncements = MOCK_ANNOUNCEMENTS.filter(a => 
+    const recentAnnouncements = formattedAnnouncements.filter(a => 
       new Date(a.posted_at) >= sevenDaysAgo
     );
 
     // Build context for the model
     const canvasContext = {
       current_time: now.toISOString(),
-      courses: MOCK_COURSES,
-      assignments: filteredAssignments,
+      courses: formattedCourses,
+      assignments: formattedAssignments,
       announcements: recentAnnouncements,
     };
 
@@ -271,7 +392,7 @@ When you reference specific assignments, announcements, or courses in your answe
     const citations: Citation[] = [];
     
     // Check which assignments are mentioned
-    for (const assignment of MOCK_ASSIGNMENTS) {
+    for (const assignment of formattedAssignments) {
       if (assistantMessage.toLowerCase().includes(assignment.name.toLowerCase()) ||
           assistantMessage.includes(assignment.id)) {
         citations.push({
@@ -284,7 +405,7 @@ When you reference specific assignments, announcements, or courses in your answe
     }
 
     // Check which announcements are mentioned
-    for (const announcement of MOCK_ANNOUNCEMENTS) {
+    for (const announcement of formattedAnnouncements) {
       if (assistantMessage.toLowerCase().includes(announcement.title.toLowerCase()) ||
           assistantMessage.includes(announcement.id)) {
         citations.push({
@@ -297,14 +418,14 @@ When you reference specific assignments, announcements, or courses in your answe
     }
 
     // Check which courses are mentioned
-    for (const course of MOCK_COURSES) {
+    for (const course of formattedCourses) {
       if (assistantMessage.toLowerCase().includes(course.name.toLowerCase()) ||
           assistantMessage.toLowerCase().includes(course.course_code.toLowerCase())) {
         citations.push({
           type: "course",
           id: course.id,
           title: `${course.name} (${course.course_code})`,
-          html_url: `https://canvas.instructure.com/courses/${course.id}`,
+          html_url: `${CANVAS_API_URL}/courses/${course.id}`,
         });
       }
     }
