@@ -154,71 +154,73 @@ export default function AssignmentsPage() {
         transition={{ delay: 0.03, duration: 0.2 }}
         className="card-matte p-2.5 sticky top-14 z-20"
       >
-        <div className="flex flex-wrap items-center gap-2">
-          {/* Search - flexible width */}
-          <div className="relative flex-1 min-w-[140px] max-w-[200px]">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+          {/* Search - full width on mobile, limited on desktop */}
+          <div className="relative flex-1 sm:max-w-[200px]">
             <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
             <Input
               type="search"
               placeholder="Search..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="pl-8 h-7 text-xs input-premium"
+              className="pl-8 h-8 sm:h-7 text-sm sm:text-xs input-premium"
             />
           </div>
 
-          {/* Filters Row */}
-          <Select value={statusFilter} onValueChange={(v) => setStatusFilter(v as StatusFilter)}>
-            <SelectTrigger className="w-[100px] h-7 text-xs bg-muted/50 border-border-subtle">
-              <SelectValue placeholder="Status" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Status</SelectItem>
-              <SelectItem value="not_submitted">Not Submitted</SelectItem>
-              <SelectItem value="submitted">Submitted</SelectItem>
-              <SelectItem value="missing">Missing</SelectItem>
-              <SelectItem value="graded">Graded</SelectItem>
-            </SelectContent>
-          </Select>
-
-          <Select value={dueRange} onValueChange={(v) => setDueRange(v as DueRange)}>
-            <SelectTrigger className="w-[90px] h-7 text-xs bg-muted/50 border-border-subtle">
-              <SelectValue placeholder="Due" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="today">Today</SelectItem>
-              <SelectItem value="week">7 Days</SelectItem>
-              <SelectItem value="two_weeks">14 Days</SelectItem>
-              <SelectItem value="all">All</SelectItem>
-            </SelectContent>
-          </Select>
-
-          <Select value={courseFilter} onValueChange={setCourseFilter}>
-            <SelectTrigger className="w-[110px] h-7 text-xs bg-muted/50 border-border-subtle">
-              <SelectValue placeholder="Course" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Courses</SelectItem>
-              {courses?.map((course) => (
-                <SelectItem key={course.id} value={course.id}>
-                  {course.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-
-          <div className="flex items-center gap-1 ml-auto">
-            <SortAsc className="w-3 h-3 text-muted-foreground" />
-            <Select value={sortBy} onValueChange={(v) => setSortBy(v as SortOption)}>
-              <SelectTrigger className="w-[80px] h-7 text-xs bg-muted/50 border-border-subtle">
-                <SelectValue placeholder="Sort" />
+          {/* Filters Row - scrollable on mobile */}
+          <div className="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0 -mx-1 px-1 sm:mx-0 sm:px-0 scrollbar-none">
+            <Select value={statusFilter} onValueChange={(v) => setStatusFilter(v as StatusFilter)}>
+              <SelectTrigger className="w-[100px] sm:w-[100px] h-8 sm:h-7 text-xs bg-muted/50 border-border-subtle flex-shrink-0">
+                <SelectValue placeholder="Status" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="due">Due</SelectItem>
-                <SelectItem value="course">Course</SelectItem>
-                <SelectItem value="points">Points</SelectItem>
+                <SelectItem value="all">All Status</SelectItem>
+                <SelectItem value="not_submitted">Not Submitted</SelectItem>
+                <SelectItem value="submitted">Submitted</SelectItem>
+                <SelectItem value="missing">Missing</SelectItem>
+                <SelectItem value="graded">Graded</SelectItem>
               </SelectContent>
             </Select>
+
+            <Select value={dueRange} onValueChange={(v) => setDueRange(v as DueRange)}>
+              <SelectTrigger className="w-[90px] h-8 sm:h-7 text-xs bg-muted/50 border-border-subtle flex-shrink-0">
+                <SelectValue placeholder="Due" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="today">Today</SelectItem>
+                <SelectItem value="week">7 Days</SelectItem>
+                <SelectItem value="two_weeks">14 Days</SelectItem>
+                <SelectItem value="all">All</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <Select value={courseFilter} onValueChange={setCourseFilter}>
+              <SelectTrigger className="w-[110px] h-8 sm:h-7 text-xs bg-muted/50 border-border-subtle flex-shrink-0">
+                <SelectValue placeholder="Course" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Courses</SelectItem>
+                {courses?.map((course) => (
+                  <SelectItem key={course.id} value={course.id}>
+                    {course.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            <div className="flex items-center gap-1 ml-auto flex-shrink-0">
+              <SortAsc className="w-3 h-3 text-muted-foreground hidden sm:block" />
+              <Select value={sortBy} onValueChange={(v) => setSortBy(v as SortOption)}>
+                <SelectTrigger className="w-[80px] h-8 sm:h-7 text-xs bg-muted/50 border-border-subtle">
+                  <SelectValue placeholder="Sort" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="due">Due</SelectItem>
+                  <SelectItem value="course">Course</SelectItem>
+                  <SelectItem value="points">Points</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
         </div>
       </motion.div>
