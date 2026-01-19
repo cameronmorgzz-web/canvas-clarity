@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef, useCallback } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useCursor } from "@/hooks/use-cursor";
 import "./custom-cursor.css";
 
 interface CursorState {
@@ -19,6 +20,7 @@ const MAX_RIPPLES = 3;
 
 export function CustomCursor() {
   const isMobile = useIsMobile();
+  const { isCustomCursorEnabled } = useCursor();
   const [cursorState, setCursorState] = useState<CursorState>({
     isHovering: false,
     isClicking: false,
@@ -29,6 +31,7 @@ export function CustomCursor() {
   const rippleIdRef = useRef(0);
   const cursorRef = useRef<HTMLDivElement>(null);
   const dotRef = useRef<HTMLDivElement>(null);
+  const glowRef = useRef<HTMLDivElement>(null);
   const rafRef = useRef<number>();
   const mousePos = useRef({ x: 0, y: 0 });
   const cursorPos = useRef({ x: 0, y: 0 });
@@ -38,6 +41,7 @@ export function CustomCursor() {
   const animateCursor = useCallback(() => {
     const cursor = cursorRef.current;
     const dot = dotRef.current;
+    const glow = glowRef.current;
     
     if (cursor && dot) {
       // Lerp factor for smooth following
@@ -52,13 +56,23 @@ export function CustomCursor() {
       
       cursor.style.transform = `translate(${cursorPos.current.x}px, ${cursorPos.current.y}px) translate(-50%, -50%)`;
       dot.style.transform = `translate(${dotPos.current.x}px, ${dotPos.current.y}px) translate(-50%, -50%)`;
+      
+      // Glow follows the cursor ring position
+      if (glow) {
+        glow.style.transform = `translate(${cursorPos.current.x}px, ${cursorPos.current.y}px) translate(-50%, -50%)`;
+      }
     }
     
     rafRef.current = requestAnimationFrame(animateCursor);
   }, []);
 
   useEffect(() => {
-    if (isMobile) return;
+    if (isMobile || !isCustomCursorEnabled) {
+      // Restore default cursor
+      document.body.style.cursor = "";
+      document.getElementById("custom-cursor-style")?.remove();
+      return;
+    }
 
     // Check for reduced motion preference
     const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -128,12 +142,19 @@ export function CustomCursor() {
     document.addEventListener("mouseup", handleMouseUp);
     document.addEventListener("mouseover", handleMouseOver, { passive: true });
 
-    // Hide default cursor
+    // Hide default cursor globally
     document.body.style.cursor = "none";
     
     const style = document.createElement("style");
     style.id = "custom-cursor-style";
-    style.textContent = `*, *::before, *::after { cursor: none !important; }`;
+    style.textContent = `
+      *, *::before, *::after { 
+        cursor: none !important; 
+      }
+      html, body {
+        cursor: none !important;
+      }
+    `;
     document.head.appendChild(style);
 
     return () => {
@@ -147,15 +168,19 @@ export function CustomCursor() {
       document.body.style.cursor = "";
       document.getElementById("custom-cursor-style")?.remove();
     };
-  }, [isMobile, animateCursor]);
+  }, [isMobile, isCustomCursorEnabled, animateCursor]);
 
-  if (isMobile) return null;
+  if (isMobile || !isCustomCursorEnabled) return null;
 
   const cursorClass = `custom-cursor-ring ${cursorState.isHovering ? "hovering" : ""} ${cursorState.isClicking ? "clicking" : ""} ${isVisible ? "visible" : ""}`;
   const dotClass = `custom-cursor-dot ${cursorState.isHovering ? "hovering" : ""} ${cursorState.isClicking ? "clicking" : ""} ${isVisible ? "visible" : ""}`;
+  const glowClass = `custom-cursor-glow ${cursorState.isHovering ? "hovering" : ""} ${isVisible ? "visible" : ""}`;
 
   return (
     <>
+      {/* Glow effect - follows the ring */}
+      <div ref={glowRef} className={glowClass} />
+      
       {/* Main cursor ring */}
       <div ref={cursorRef} className={cursorClass} />
       

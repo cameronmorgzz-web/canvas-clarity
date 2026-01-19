@@ -1,0 +1,41 @@
+Day,Period,Start,Subject,Course,Teacher,Room
+Monday,Period 1,08:10,IGCSE Computer Science,Y10 IGCSE_CS 104,Mr Harkins,301
+Monday,Period 2,08:50,IGCSE Computer Science,Y10 IGCSE_CS 104,Mr Harkins,301
+Monday,Period 3,09:30,IGCSE Physics,Y10 IGCSE_PHY 103,Mr Fulgham,304
+Monday,Period 4,10:10,IGCSE Physics,Y10 IGCSE_PHY 103,Mr Fulgham,304
+Monday,Period 5,11:10,Cycle Tests,Y10 S_CTEST 10H,Ms Congedo,
+Monday,Period 6,11:50,HS Form,Y10 PSHE/ASS 10H,Mr Scotto,
+Monday,Period 7,12:30,Italian Language and Culture Acquisition,Y10 ITA_LCA 101,Miss Gilardoni,311
+Monday,Period 8,13:10,Italian Language and Culture Acquisition,Y10 ITA_LCA 101,Miss Gilardoni,311
+Tuesday,Period 1,08:10,IGCSE French,Y10 IGCSE_FRE 104,Miss Guidez,302
+Tuesday,Period 2,08:50,IGCSE French,Y10 IGCSE_FRE 104,Miss Guidez,302
+Tuesday,Period 3,09:30,IGCSE Maths Ext,Y10 MAT_EXT 104,Mr Guite,209
+Tuesday,Period 4,10:10,IGCSE Global Perspectives,Y10 IGCSE_GP 1,Ms Connell,206
+Tuesday,Period 5,11:10,IGCSE English Literature,Y10 IGCSE_LIT 104,Mr Scotto,209
+Tuesday,Period 6,11:50,IGCSE English Literature,Y10 IGCSE_LIT 104,Mr Scotto,209
+Tuesday,Period 7,12:30,IGCSE Economics,Y10 IGCSE_ECO 106,Ms Marques,315
+Tuesday,Period 8,13:10,IGCSE Economics,Y10 IGCSE_ECO 106,Ms Marques,315
+Wednesday,Period 1,08:10,IGCSE Economics,Y10 IGCSE_ECO 106,Ms Marques,315
+Wednesday,Period 2,08:50,IGCSE Economics,Y10 IGCSE_ECO 106,Ms Marques,315
+Wednesday,Period 3,09:30,IGCSE English Literature,Y10 IGCSE_LIT 104,Mr Scotto,
+Wednesday,Period 4,10:10,IGCSE English Literature,Y10 IGCSE_LIT 104,Mr Scotto,
+Wednesday,Period 5,11:10,IGCSE Global Perspectives,Y10 IGCSE_GP 1,Ms Connell,206
+Wednesday,Period 6,11:50,Cycle Tests,Y10 S_CTEST 10H,Mr Stam,
+Wednesday,Period 7,12:30,IGCSE Maths Ext,Y10 MAT_EXT 104,Mr Guite,209
+Wednesday,Period 8,13:10,IGCSE Maths Ext,Y10 MAT_EXT 104,Mr Guite,209
+Thursday,Period 1,08:10,IGCSE Physics,Y10 IGCSE_PHY 103,Mr Fulgham,304
+Thursday,Period 2,08:50,IGCSE Physics,Y10 IGCSE_PHY 103,Mr Fulgham,304
+Thursday,Period 3,09:30,IGCSE English Literature,Y10 IGCSE_LIT 104,Mr Scotto,
+Thursday,Period 4,10:10,IGCSE English Literature,Y10 IGCSE_LIT 104,Mr Scotto,
+Thursday,Period 5,11:10,IGCSE French,Y10 IGCSE_FRE 104,Miss Guidez,302
+Thursday,Period 6,11:50,IGCSE French,Y10 IGCSE_FRE 104,Miss Guidez,302
+Thursday,Period 7,12:30,IGCSE Computer Science,Y10 IGCSE_CS 104,Mr Harkins,301
+Thursday,Period 8,13:10,IGCSE Computer Science,Y10 IGCSE_CS 104,Mr Harkins,301
+Friday,Period 1,08:10,IGCSE English Literature,Y10 IGCSE_LIT 104,Mr Scotto,
+Friday,Period 2,08:50,IGCSE English Literature,Y10 IGCSE_LIT 104,Mr Scotto,
+Friday,Period 3,09:30,IGCSE Maths Ext,Y10 MAT_EXT 104,Mr Guite,209
+Friday,Period 4,10:10,IGCSE Maths Ext,Y10 MAT_EXT 104,Mr Guite,209
+Friday,Period 5,11:10,IGCSE Global Perspectives,Y10 IGCSE_GP 1,Ms Connell,206
+Friday,Period 6,11:50,IGCSE Global Perspectives,Y10 IGCSE_GP 1,Ms Connell,206
+Friday,Period 7,12:30,Italian Language and Culture Acquisition,Y10 ITA_LCA 101,Miss Gilardoni,311
+Friday,Period 8,13:10,Italian Language and Culture Acquisition,Y10 ITA_LCA 101,Miss Gilardoni,311

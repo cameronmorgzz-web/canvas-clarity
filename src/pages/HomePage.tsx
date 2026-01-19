@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
-import { AlertTriangle, CalendarDays, Clock, Megaphone, Pin, Sparkles } from "lucide-react";
+import { Megaphone, Pin, Sparkles, GraduationCap } from "lucide-react";
 import { fetchUpcoming, fetchAnnouncements } from "@/lib/api";
 import { useSettings } from "@/hooks/use-settings";
 import type { Assignment } from "@/types/canvas";
@@ -13,12 +13,17 @@ import { EmptyStateCard } from "@/components/EmptyStateCard";
 import { ErrorBanner } from "@/components/ErrorBanner";
 import { SkeletonList, SkeletonWeekStrip } from "@/components/SkeletonCard";
 import { CollapsibleSection } from "@/components/CollapsibleSection";
+import { FocusSummaryCard } from "@/components/FocusSummaryCard";
+import { TimetableCard } from "@/components/TimetableCard";
 import { cn } from "@/lib/utils";
+
+type FilterType = "all" | "overdue" | "today" | "week" | "done";
 
 export default function HomePage() {
   const { refreshInterval, showAnnouncements, pinnedAssignments, completedAssignments } = useSettings();
   const [selectedAssignment, setSelectedAssignment] = useState<Assignment | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [activeFilter, setActiveFilter] = useState<FilterType>("all");
 
   const { 
     data: upcoming, 
@@ -67,11 +72,31 @@ export default function HomePage() {
   const todayItems = filterCompleted(upcoming?.due_today || []);
   const soonItems = filterCompleted(upcoming?.due_soon || []);
   const weekItems = filterCompleted(allAssignments);
+  const doneItems = allAssignments.filter(a => completedAssignments.includes(a.id));
 
-  // Focus summary counts (excluding completed)
+  // Focus summary counts
   const overdueCount = overdueItems.length;
   const todayCount = todayItems.length;
   const weekCount = weekItems.length;
+  const doneCount = doneItems.length;
+
+  // Filtered items based on active filter
+  const filteredAssignments = useMemo(() => {
+    switch (activeFilter) {
+      case "overdue":
+        return overdueItems;
+      case "today":
+        return todayItems;
+      case "week":
+        return weekItems;
+      case "done":
+        return doneItems;
+      default:
+        return null; // null means show all sections
+    }
+  }, [activeFilter, overdueItems, todayItems, weekItems, doneItems]);
+
+  const showAllSections = activeFilter === "all";
 
   return (
     <div className="max-w-3xl mx-auto space-y-5">
@@ -82,7 +107,7 @@ export default function HomePage() {
         transition={{ duration: 0.2, ease: [0.32, 0.72, 0, 1] }}
         className="hero-glass p-5"
       >
-        <div className="flex items-start justify-between gap-4">
+        <div className="flex items-start justify-between gap-4 mb-4">
           <div>
             <h1 className="text-2xl sm:text-3xl font-bold text-foreground mb-1 tracking-tight">
               Home
@@ -92,44 +117,24 @@ export default function HomePage() {
           <Sparkles className="w-5 h-5 text-primary/50" />
         </div>
         
-        {/* Focus Summary Chips */}
+        {/* Week Strip at top */}
+        <div className="card-matte p-3 mb-4">
+          {upcomingLoading ? <SkeletonWeekStrip /> : <WeekStrip assignments={weekItems} />}
+        </div>
+        
+        {/* Timetable - compact view */}
+        <TimetableCard compact className="mb-4" />
+        
+        {/* Focus Summary Chips - clickable filters */}
         {!upcomingLoading && (
-          <motion.div 
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1, duration: 0.2 }}
-            className="flex flex-wrap gap-1.5 mt-4"
-          >
-            {overdueCount > 0 && (
-              <motion.span 
-                className="focus-chip focus-chip-urgent"
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                transition={{ type: "spring", stiffness: 400, damping: 20 }}
-              >
-                <AlertTriangle className="w-2.5 h-2.5" />
-                {overdueCount} overdue
-              </motion.span>
-            )}
-            <motion.span 
-              className={cn("focus-chip", todayCount > 0 && "focus-chip-today")}
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              transition={{ type: "spring", stiffness: 400, damping: 20, delay: 0.05 }}
-            >
-              <Clock className="w-2.5 h-2.5" />
-              {todayCount} due today
-            </motion.span>
-            <motion.span 
-              className="focus-chip"
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              transition={{ type: "spring", stiffness: 400, damping: 20, delay: 0.1 }}
-            >
-              <CalendarDays className="w-2.5 h-2.5" />
-              {weekCount} this week
-            </motion.span>
-          </motion.div>
+          <FocusSummaryCard
+            overdueCount={overdueCount}
+            todayCount={todayCount}
+            weekCount={weekCount}
+            doneCount={doneCount}
+            activeFilter={activeFilter}
+            onFilterChange={setActiveFilter}
+          />
         )}
       </motion.div>
 
@@ -137,108 +142,91 @@ export default function HomePage() {
         <ErrorBanner message="Couldn't load assignments" onRetry={() => refetchUpcoming()} />
       )}
 
-      {/* Pinned Items */}
-      {pinnedItems.length > 0 && (
+      {/* Filtered View */}
+      {!showAllSections && filteredAssignments && (
         <CollapsibleSection
-          title="Pinned"
-          icon={<Pin className="w-3.5 h-3.5 text-primary" />}
+          title={activeFilter === "done" ? "Completed" : activeFilter === "week" ? "This Week" : activeFilter === "today" ? "Due Today" : "Overdue"}
+          icon={<GraduationCap className="w-3.5 h-3.5 text-primary" />}
+          badge={<span className="text-xs text-muted-foreground">({filteredAssignments.length})</span>}
           defaultOpen={true}
         >
-          <div className="space-y-1.5">
-            {pinnedItems.map((a) => (
-              <AssignmentCardRow key={a.id} assignment={a} onClick={() => handleAssignmentClick(a)} />
-            ))}
-          </div>
-        </CollapsibleSection>
-      )}
-
-      {/* Overdue Section */}
-      {!upcomingLoading && overdueItems.length > 0 && (
-        <CollapsibleSection
-          title="Overdue"
-          icon={<AlertTriangle className="w-3.5 h-3.5 text-status-overdue" />}
-          badge={<span className="status-overdue">{overdueItems.length}</span>}
-          defaultOpen={true}
-        >
-          <div className="space-y-1.5">
-            {overdueItems.map((a) => (
-              <AssignmentCardRow key={a.id} assignment={a} onClick={() => handleAssignmentClick(a)} />
-            ))}
-          </div>
-        </CollapsibleSection>
-      )}
-
-      {/* Due Today */}
-      <CollapsibleSection
-        title="Due Today"
-        icon={<Clock className="w-3.5 h-3.5 text-status-today" />}
-        badge={!upcomingLoading && <span className="status-today">{todayItems.length}</span>}
-        defaultOpen={true}
-      >
-        {upcomingLoading ? (
-          <SkeletonList count={2} />
-        ) : todayItems.length > 0 ? (
-          <div className="space-y-1.5">
-            {todayItems.map((a) => (
-              <AssignmentCardRow key={a.id} assignment={a} onClick={() => handleAssignmentClick(a)} />
-            ))}
-          </div>
-        ) : (
-          <EmptyStateCard type="caught-up" title="Nothing due today" />
-        )}
-      </CollapsibleSection>
-
-      {/* Next Up */}
-      <CollapsibleSection
-        title="Next Up"
-        icon={<Clock className="w-3.5 h-3.5 text-status-soon" />}
-        badge={<span className="text-[10px] text-muted-foreground">(48h)</span>}
-        defaultOpen={true}
-      >
-        {upcomingLoading ? (
-          <SkeletonList count={2} />
-        ) : soonItems.length > 0 ? (
-          <div className="space-y-1.5">
-            {soonItems.map((a) => (
-              <AssignmentCardRow key={a.id} assignment={a} onClick={() => handleAssignmentClick(a)} />
-            ))}
-          </div>
-        ) : (
-          <EmptyStateCard type="no-items" description="Nothing due in the next 48 hours" />
-        )}
-      </CollapsibleSection>
-
-      {/* This Week */}
-      <CollapsibleSection
-        title="This Week"
-        icon={<CalendarDays className="w-3.5 h-3.5 text-primary" />}
-        defaultOpen={true}
-      >
-        <div className="card-matte p-3">
-          {upcomingLoading ? <SkeletonWeekStrip /> : <WeekStrip assignments={weekItems} />}
-        </div>
-      </CollapsibleSection>
-
-      {/* Announcements */}
-      {showAnnouncements && (
-        <CollapsibleSection
-          title="Announcements"
-          icon={<Megaphone className="w-3.5 h-3.5 text-primary" />}
-          defaultOpen={false}
-        >
-          {announcementsError && (
-            <ErrorBanner message="Couldn't load announcements" onRetry={() => refetchAnnouncements()} />
-          )}
-          {announcementsLoading ? (
-            <SkeletonList count={2} />
-          ) : announcements && announcements.length > 0 ? (
+          {filteredAssignments.length > 0 ? (
             <div className="space-y-1.5">
-              {announcements.slice(0, 3).map((a) => <AnnouncementCard key={a.id} announcement={a} />)}
+              {filteredAssignments.map((a) => (
+                <AssignmentCardRow key={a.id} assignment={a} onClick={() => handleAssignmentClick(a)} />
+              ))}
             </div>
           ) : (
-            <EmptyStateCard type="no-items" title="No new announcements" />
+            <EmptyStateCard 
+              type="caught-up" 
+              title={activeFilter === "done" ? "No completed assignments" : "Nothing here"} 
+            />
           )}
         </CollapsibleSection>
+      )}
+
+      {/* All Sections View */}
+      {showAllSections && (
+        <>
+          {/* Pinned Items */}
+          {pinnedItems.length > 0 && (
+            <CollapsibleSection
+              title="Pinned"
+              icon={<Pin className="w-3.5 h-3.5 text-primary" />}
+              defaultOpen={true}
+            >
+              <div className="space-y-1.5">
+                {pinnedItems.map((a) => (
+                  <AssignmentCardRow key={a.id} assignment={a} onClick={() => handleAssignmentClick(a)} />
+                ))}
+              </div>
+            </CollapsibleSection>
+          )}
+
+          {/* Due Today & Tomorrow combined */}
+          <CollapsibleSection
+            title="Due Soon"
+            badge={!upcomingLoading && <span className="text-xs text-muted-foreground">({todayCount + soonItems.length})</span>}
+            defaultOpen={true}
+          >
+            {upcomingLoading ? (
+              <SkeletonList count={2} />
+            ) : (todayItems.length > 0 || soonItems.length > 0) ? (
+              <div className="space-y-1.5">
+                {todayItems.map((a) => (
+                  <AssignmentCardRow key={a.id} assignment={a} onClick={() => handleAssignmentClick(a)} />
+                ))}
+                {soonItems.map((a) => (
+                  <AssignmentCardRow key={a.id} assignment={a} onClick={() => handleAssignmentClick(a)} />
+                ))}
+              </div>
+            ) : (
+              <EmptyStateCard type="caught-up" title="Nothing due soon" />
+            )}
+          </CollapsibleSection>
+
+          {/* Announcements */}
+          {showAnnouncements && (
+            <CollapsibleSection
+              title="Announcements"
+              icon={<Megaphone className="w-3.5 h-3.5 text-primary" />}
+              defaultOpen={false}
+            >
+              {announcementsError && (
+                <ErrorBanner message="Couldn't load announcements" onRetry={() => refetchAnnouncements()} />
+              )}
+              {announcementsLoading ? (
+                <SkeletonList count={2} />
+              ) : announcements && announcements.length > 0 ? (
+                <div className="space-y-1.5">
+                  {announcements.slice(0, 3).map((a) => <AnnouncementCard key={a.id} announcement={a} />)}
+                </div>
+              ) : (
+                <EmptyStateCard type="no-items" title="No new announcements" />
+              )}
+            </CollapsibleSection>
+          )}
+        </>
       )}
 
       <DetailsDrawer assignment={selectedAssignment} open={drawerOpen} onClose={() => setDrawerOpen(false)} />

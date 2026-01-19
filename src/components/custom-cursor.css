@@ -1,18 +1,19 @@
 /* Custom Cursor - GPU-accelerated with CSS animations */
 
 .custom-cursor-ring,
-.custom-cursor-dot {
+.custom-cursor-dot,
+.custom-cursor-glow {
   position: fixed;
   pointer-events: none;
   z-index: 9999;
-  mix-blend-mode: difference;
   opacity: 0;
   will-change: transform, opacity;
   transition: opacity 0.15s ease;
 }
 
 .custom-cursor-ring.visible,
-.custom-cursor-dot.visible {
+.custom-cursor-dot.visible,
+.custom-cursor-glow.visible {
   opacity: 1;
 }
 
@@ -22,6 +23,7 @@
   height: 32px;
   border: 2px solid rgba(255, 255, 255, 0.6);
   border-radius: 50%;
+  mix-blend-mode: difference;
   box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
   transition: 
     width 0.2s ease,
@@ -52,6 +54,7 @@
   height: 6px;
   background-color: white;
   border-radius: 50%;
+  mix-blend-mode: difference;
   transition: 
     transform 0.15s ease,
     opacity 0.15s ease;
@@ -63,6 +66,33 @@
 
 .custom-cursor-dot.clicking {
   transform: translate(-50%, -50%) scale(0.5);
+}
+
+/* Glow effect - follows cursor ring */
+.custom-cursor-glow {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    hsl(var(--primary) / 0.15) 0%,
+    hsl(var(--primary) / 0.08) 30%,
+    transparent 70%
+  );
+  filter: blur(20px);
+  z-index: 9997;
+  opacity: 0;
+  transition: opacity 0.3s ease, transform 0.1s ease;
+}
+
+.custom-cursor-glow.visible {
+  opacity: 0.6;
+}
+
+.custom-cursor-glow.hovering {
+  width: 180px;
+  height: 180px;
+  opacity: 0.8;
 }
 
 /* Ripple effect - pure CSS animation */
@@ -96,6 +126,7 @@
 @media (prefers-reduced-motion: reduce) {
   .custom-cursor-ring,
   .custom-cursor-dot,
+  .custom-cursor-glow,
   .cursor-ripple {
     transition: none !important;
     animation: none !important;
