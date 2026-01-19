@@ -136,44 +136,40 @@ export default function AssignmentsPage() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-5">
+    <div className="max-w-3xl mx-auto space-y-4">
       {/* Page Header */}
       <motion.div
-        initial={{ opacity: 0, y: 16 }}
+        initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.28 }}
+        transition={{ duration: 0.2 }}
       >
-        <h1 className="text-3xl font-bold text-foreground mb-1 tracking-tight">Assignments</h1>
-        <p className="text-muted-foreground">All your assignments in one place.</p>
+        <h1 className="text-2xl font-bold text-foreground mb-0.5 tracking-tight">Assignments</h1>
+        <p className="text-sm text-muted-foreground">All your assignments in one place.</p>
       </motion.div>
 
-      {/* Filters Bar */}
+      {/* Compact Single-Row Filters Bar */}
       <motion.div 
-        initial={{ opacity: 0, y: 16 }}
+        initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.05, duration: 0.28 }}
-        className="card-matte p-4 space-y-3 sticky top-14 z-20"
+        transition={{ delay: 0.03, duration: 0.2 }}
+        className="card-matte p-2.5 sticky top-14 z-20"
       >
-        {/* Search */}
-        <div className="relative">
-          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-          <Input
-            type="search"
-            placeholder="Search assignments..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="pl-10 h-9 input-premium text-sm"
-          />
-        </div>
-
-        {/* Filter Row */}
         <div className="flex flex-wrap items-center gap-2">
-          <div className="flex items-center gap-1.5 text-muted-foreground">
-            <Filter className="w-3.5 h-3.5" />
+          {/* Search - flexible width */}
+          <div className="relative flex-1 min-w-[140px] max-w-[200px]">
+            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
+            <Input
+              type="search"
+              placeholder="Search..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="pl-8 h-7 text-xs input-premium"
+            />
           </div>
-          
+
+          {/* Filters Row */}
           <Select value={statusFilter} onValueChange={(v) => setStatusFilter(v as StatusFilter)}>
-            <SelectTrigger className="w-32 h-8 text-xs bg-muted/50 border-border-subtle">
+            <SelectTrigger className="w-[100px] h-7 text-xs bg-muted/50 border-border-subtle">
               <SelectValue placeholder="Status" />
             </SelectTrigger>
             <SelectContent>
@@ -186,19 +182,19 @@ export default function AssignmentsPage() {
           </Select>
 
           <Select value={dueRange} onValueChange={(v) => setDueRange(v as DueRange)}>
-            <SelectTrigger className="w-32 h-8 text-xs bg-muted/50 border-border-subtle">
+            <SelectTrigger className="w-[90px] h-7 text-xs bg-muted/50 border-border-subtle">
               <SelectValue placeholder="Due" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="today">Today</SelectItem>
-              <SelectItem value="week">This Week</SelectItem>
+              <SelectItem value="week">7 Days</SelectItem>
               <SelectItem value="two_weeks">14 Days</SelectItem>
-              <SelectItem value="all">All Time</SelectItem>
+              <SelectItem value="all">All</SelectItem>
             </SelectContent>
           </Select>
 
           <Select value={courseFilter} onValueChange={setCourseFilter}>
-            <SelectTrigger className="w-36 h-8 text-xs bg-muted/50 border-border-subtle">
+            <SelectTrigger className="w-[110px] h-7 text-xs bg-muted/50 border-border-subtle">
               <SelectValue placeholder="Course" />
             </SelectTrigger>
             <SelectContent>
@@ -211,14 +207,14 @@ export default function AssignmentsPage() {
             </SelectContent>
           </Select>
 
-          <div className="flex items-center gap-1.5 ml-auto text-muted-foreground">
-            <SortAsc className="w-3.5 h-3.5" />
+          <div className="flex items-center gap-1 ml-auto">
+            <SortAsc className="w-3 h-3 text-muted-foreground" />
             <Select value={sortBy} onValueChange={(v) => setSortBy(v as SortOption)}>
-              <SelectTrigger className="w-24 h-8 text-xs bg-muted/50 border-border-subtle">
+              <SelectTrigger className="w-[80px] h-7 text-xs bg-muted/50 border-border-subtle">
                 <SelectValue placeholder="Sort" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="due">Due Date</SelectItem>
+                <SelectItem value="due">Due</SelectItem>
                 <SelectItem value="course">Course</SelectItem>
                 <SelectItem value="points">Points</SelectItem>
               </SelectContent>
@@ -237,16 +233,16 @@ export default function AssignmentsPage() {
 
       {/* Results */}
       <motion.div 
-        initial={{ opacity: 0, y: 16 }}
+        initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.1, duration: 0.28 }}
-        className="space-y-2"
+        transition={{ delay: 0.06, duration: 0.2 }}
+        className="space-y-1.5"
       >
         {isLoading ? (
           <SkeletonList count={6} />
         ) : filteredAssignments.length > 0 ? (
           <>
-            <p className="text-xs text-muted-foreground mb-3">
+            <p className="text-[11px] text-muted-foreground mb-2">
               {filteredAssignments.length} assignment{filteredAssignments.length !== 1 ? "s" : ""}
             </p>
             {filteredAssignments.map((assignment) => (

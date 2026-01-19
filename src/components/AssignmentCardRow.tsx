@@ -1,11 +1,12 @@
 import { motion } from "framer-motion";
 import { format, formatDistanceToNow, isToday, isTomorrow, isPast } from "date-fns";
-import { ExternalLink, ChevronRight, Pin, Check } from "lucide-react";
+import { ExternalLink, ChevronRight, Pin, Check, Clock3 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Assignment } from "@/types/canvas";
 import { StatusBadge } from "./StatusBadge";
 import { CoursePill } from "./CoursePill";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useSettings } from "@/hooks/use-settings";
 import { useToastActions } from "@/hooks/use-toast-actions";
 
@@ -32,15 +33,15 @@ export function AssignmentCardRow({
 
   const formatDueDate = () => {
     if (isToday(dueDate)) {
-      return `Today at ${format(dueDate, "h:mm a")}`;
+      return format(dueDate, "h:mm a");
     }
     if (isTomorrow(dueDate)) {
-      return `Tomorrow at ${format(dueDate, "h:mm a")}`;
+      return `Tomorrow ${format(dueDate, "h:mm a")}`;
     }
     if (isPast(dueDate)) {
       return `${formatDistanceToNow(dueDate)} ago`;
     }
-    return format(dueDate, "EEE, MMM d 'at' h:mm a");
+    return format(dueDate, "EEE, MMM d");
   };
 
   const handlePin = (e: React.MouseEvent) => {
@@ -57,18 +58,22 @@ export function AssignmentCardRow({
     showCompleted(newCompleted, newCompleted ? () => uncompleteAssignment(assignment.id) : undefined);
   };
 
+  const handleCheckboxClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+  };
+
   return (
     <motion.div 
-      initial={{ opacity: 0, y: 8 }}
+      initial={{ opacity: 0, y: 4 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.2, ease: [0.25, 0.1, 0.25, 1] }}
+      transition={{ duration: 0.15, ease: [0.25, 0.1, 0.25, 1] }}
       whileHover={{ y: -1 }}
-      whileTap={{ scale: 0.995 }}
+      whileTap={{ scale: 0.998 }}
       className={cn(
         "card-interactive cursor-pointer group relative",
-        isCompact ? "p-3" : "p-4",
+        isCompact ? "py-2 px-2.5" : "py-2.5 px-3",
         isOverdue && !completed && "card-overdue",
-        completed && "opacity-60",
+        completed && "opacity-50",
         className
       )}
       onClick={onClick}
@@ -76,111 +81,106 @@ export function AssignmentCardRow({
       tabIndex={0}
       onKeyDown={(e) => e.key === "Enter" && onClick?.()}
     >
-      <div className={cn(
-        "flex items-start justify-between gap-4",
-        isCompact && "items-center"
-      )}>
-        <div className="flex-1 min-w-0">
-          {/* Row 1: Pills */}
-          <div className="flex items-center gap-2 mb-2 flex-wrap">
+      <div className="flex items-center gap-2.5">
+        {/* Inline Checkbox */}
+        <div onClick={handleCheckboxClick} className="shrink-0">
+          <Checkbox 
+            checked={completed}
+            onCheckedChange={() => {
+              const newCompleted = !completed;
+              toggleCompleteAssignment(assignment.id);
+              showCompleted(newCompleted, newCompleted ? () => uncompleteAssignment(assignment.id) : undefined);
+            }}
+            className={cn(
+              "h-4 w-4 rounded-[4px] border-border-bright transition-colors",
+              completed && "bg-green-500/20 border-green-500/40 data-[state=checked]:bg-green-500 data-[state=checked]:border-green-500"
+            )}
+          />
+        </div>
+
+        {/* Main Content - 2 Row Layout */}
+        <div className="flex-1 min-w-0 flex flex-col gap-0.5">
+          {/* Row 1: Title + Due/Points */}
+          <div className="flex items-center justify-between gap-3">
+            <h3 className={cn(
+              "font-medium text-foreground truncate flex-1",
+              "group-hover:text-primary transition-colors duration-100",
+              isCompact ? "text-[13px]" : "text-sm",
+              completed && "line-through text-muted-foreground"
+            )}>
+              {assignment.name}
+            </h3>
+            
+            <div className="flex items-center gap-2 shrink-0">
+              {/* Due Date Chip */}
+              <span className={cn(
+                "inline-flex items-center gap-1 text-[11px] font-medium px-1.5 py-0.5 rounded",
+                isOverdue && !completed 
+                  ? "bg-status-overdue-bg text-status-overdue" 
+                  : isToday(dueDate) 
+                    ? "bg-status-today-bg text-status-today"
+                    : "bg-muted/50 text-muted-foreground"
+              )}>
+                <Clock3 className="w-2.5 h-2.5" />
+                {formatDueDate()}
+              </span>
+              
+              {/* Points */}
+              {showGrades && assignment.points_possible !== null && (
+                <span className="text-[11px] text-muted-foreground tabular-nums">
+                  {assignment.points_possible} pts
+                </span>
+              )}
+            </div>
+          </div>
+          
+          {/* Row 2: Course + Status + Indicators */}
+          <div className="flex items-center gap-1.5">
             <CoursePill 
               name={assignment.course_name} 
-              color={assignment.course_color} 
+              color={assignment.course_color}
+              size="sm"
             />
             <StatusBadge 
               status={assignment.status} 
-              submissionState={assignment.submission_state} 
+              submissionState={assignment.submission_state}
+              size="sm"
             />
             {pinned && (
-              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-2xs font-medium bg-primary/10 text-primary border border-primary/20">
-                <Pin className="w-2.5 h-2.5" />
-                Pinned
-              </span>
-            )}
-            {completed && (
-              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-2xs font-medium bg-green-500/10 text-green-500 border border-green-500/20">
-                <Check className="w-2.5 h-2.5" />
-                Done
-              </span>
-            )}
-          </div>
-          
-          {/* Row 2: Title */}
-          <h3 className={cn(
-            "font-semibold text-foreground truncate mb-1",
-            "group-hover:text-primary transition-colors duration-120",
-            isCompact ? "text-sm" : "text-base",
-            completed && "line-through text-muted-foreground"
-          )}>
-            {assignment.name}
-          </h3>
-          
-          {/* Row 3: Due + Points */}
-          <div className="flex items-center gap-3 text-sm text-muted-foreground">
-            <span className={cn(
-              "transition-colors duration-120",
-              isOverdue && !completed && "text-status-overdue font-medium"
-            )}>
-              {formatDueDate()}
-            </span>
-            {showGrades && assignment.points_possible !== null && (
-              <>
-                <span className="text-border">•</span>
-                <span>{assignment.points_possible} pts</span>
-              </>
+              <Pin className="w-2.5 h-2.5 text-primary fill-primary" />
             )}
           </div>
         </div>
         
-        {/* Action buttons - revealed on hover */}
-        <div className="flex items-center gap-1 shrink-0">
-          <motion.div
-            initial={{ opacity: 0, x: 8 }}
-            animate={{ opacity: 0 }}
-            whileHover={{ opacity: 1 }}
-            className="opacity-0 group-hover:opacity-100 flex items-center gap-1 transition-opacity"
-          >
+        {/* Hover Actions */}
+        <div className="flex items-center gap-0.5 shrink-0">
+          <div className="opacity-0 group-hover:opacity-100 flex items-center gap-0.5 transition-opacity duration-100">
             <Button
               variant="ghost"
               size="icon"
-              className={cn(
-                "h-7 w-7 rounded-md",
-                completed && "bg-green-500/10 text-green-500"
-              )}
-              onClick={handleComplete}
-              aria-label={completed ? "Mark incomplete" : "Mark complete"}
-            >
-              <Check className={cn(
-                "w-3.5 h-3.5",
-                completed && "text-green-500"
-              )} />
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-7 w-7 rounded-md"
+              className="h-6 w-6 rounded"
               onClick={handlePin}
               aria-label={pinned ? "Unpin" : "Pin"}
             >
               <Pin className={cn(
-                "w-3.5 h-3.5",
+                "w-3 h-3",
                 pinned && "fill-primary text-primary"
               )} />
             </Button>
             <Button
               variant="ghost"
               size="icon"
-              className="h-7 w-7 rounded-md"
+              className="h-6 w-6 rounded"
               onClick={(e) => {
                 e.stopPropagation();
                 window.open(assignment.html_url, "_blank");
               }}
               aria-label="Open in Canvas"
             >
-              <ExternalLink className="w-3.5 h-3.5" />
+              <ExternalLink className="w-3 h-3" />
             </Button>
-          </motion.div>
-          <ChevronRight className="w-4 h-4 text-muted-foreground/30 group-hover:text-muted-foreground transition-colors" />
+          </div>
+          <ChevronRight className="w-3.5 h-3.5 text-muted-foreground/30 group-hover:text-muted-foreground transition-colors ml-1" />
         </div>
       </div>
     </motion.div>
