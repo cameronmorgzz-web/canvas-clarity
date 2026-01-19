@@ -15,7 +15,7 @@ import { SkeletonList, SkeletonWeekStrip } from "@/components/SkeletonCard";
 import { cn } from "@/lib/utils";
 
 export default function HomePage() {
-  const { refreshInterval, showAnnouncements, pinnedAssignments } = useSettings();
+  const { refreshInterval, showAnnouncements, pinnedAssignments, completedAssignments } = useSettings();
   const [selectedAssignment, setSelectedAssignment] = useState<Assignment | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
 
@@ -47,6 +47,10 @@ export default function HomePage() {
     setDrawerOpen(true);
   };
 
+  // Filter out completed assignments
+  const filterCompleted = (assignments: Assignment[]) => 
+    assignments.filter(a => !completedAssignments.includes(a.id));
+
   const allAssignments = [
     ...(upcoming?.overdue || []),
     ...(upcoming?.due_today || []),
@@ -54,13 +58,19 @@ export default function HomePage() {
     ...(upcoming?.this_week || []),
   ];
 
-  // Get pinned assignments
-  const pinnedItems = allAssignments.filter(a => pinnedAssignments.includes(a.id));
+  // Get pinned assignments (excluding completed)
+  const pinnedItems = filterCompleted(allAssignments.filter(a => pinnedAssignments.includes(a.id)));
 
-  // Focus summary counts
-  const overdueCount = upcoming?.overdue?.length || 0;
-  const todayCount = upcoming?.due_today?.length || 0;
-  const weekCount = allAssignments.length;
+  // Filter completed from each section
+  const overdueItems = filterCompleted(upcoming?.overdue || []);
+  const todayItems = filterCompleted(upcoming?.due_today || []);
+  const soonItems = filterCompleted(upcoming?.due_soon || []);
+  const weekItems = filterCompleted(allAssignments);
+
+  // Focus summary counts (excluding completed)
+  const overdueCount = overdueItems.length;
+  const todayCount = todayItems.length;
+  const weekCount = weekItems.length;
 
   return (
     <div className="max-w-4xl mx-auto space-y-8">
@@ -126,7 +136,7 @@ export default function HomePage() {
       )}
 
       {/* Overdue Section */}
-      {!upcomingLoading && upcoming?.overdue && upcoming.overdue.length > 0 && (
+      {!upcomingLoading && overdueItems.length > 0 && (
         <motion.section
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
@@ -135,10 +145,10 @@ export default function HomePage() {
           <div className="flex items-center gap-2 mb-3">
             <AlertTriangle className="w-4 h-4 text-status-overdue" />
             <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">Overdue</h2>
-            <span className="status-overdue ml-1">{upcoming.overdue.length}</span>
+            <span className="status-overdue ml-1">{overdueItems.length}</span>
           </div>
           <div className="space-y-2">
-            {upcoming.overdue.map((a) => (
+            {overdueItems.map((a) => (
               <AssignmentCardRow key={a.id} assignment={a} onClick={() => handleAssignmentClick(a)} />
             ))}
           </div>
@@ -154,15 +164,15 @@ export default function HomePage() {
         <div className="flex items-center gap-2 mb-3">
           <Clock className="w-4 h-4 text-status-today" />
           <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">Due Today</h2>
-          {!upcomingLoading && upcoming?.due_today && (
-            <span className="status-today ml-1">{upcoming.due_today.length}</span>
+          {!upcomingLoading && (
+            <span className="status-today ml-1">{todayItems.length}</span>
           )}
         </div>
         {upcomingLoading ? (
           <SkeletonList count={2} />
-        ) : upcoming?.due_today && upcoming.due_today.length > 0 ? (
+        ) : todayItems.length > 0 ? (
           <div className="space-y-2">
-            {upcoming.due_today.map((a) => (
+            {todayItems.map((a) => (
               <AssignmentCardRow key={a.id} assignment={a} onClick={() => handleAssignmentClick(a)} />
             ))}
           </div>
@@ -184,9 +194,9 @@ export default function HomePage() {
         </div>
         {upcomingLoading ? (
           <SkeletonList count={2} />
-        ) : upcoming?.due_soon && upcoming.due_soon.length > 0 ? (
+        ) : soonItems.length > 0 ? (
           <div className="space-y-2">
-            {upcoming.due_soon.map((a) => (
+            {soonItems.map((a) => (
               <AssignmentCardRow key={a.id} assignment={a} onClick={() => handleAssignmentClick(a)} />
             ))}
           </div>
@@ -206,7 +216,7 @@ export default function HomePage() {
           <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">This Week</h2>
         </div>
         <div className="card-matte p-4">
-          {upcomingLoading ? <SkeletonWeekStrip /> : <WeekStrip assignments={allAssignments} />}
+          {upcomingLoading ? <SkeletonWeekStrip /> : <WeekStrip assignments={weekItems} />}
         </div>
       </motion.section>
 

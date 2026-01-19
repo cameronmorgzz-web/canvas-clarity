@@ -13,6 +13,8 @@ interface SettingsStore {
   focusMode: boolean;
   density: DensityMode;
   pinnedAssignments: string[]; // Array of assignment IDs
+  completedAssignments: string[]; // Array of completed assignment IDs
+  showCompleted: boolean; // Whether to show completed in list views
   
   // Actions
   setRefreshInterval: (interval: number) => void;
@@ -25,6 +27,11 @@ interface SettingsStore {
   unpinAssignment: (id: string) => void;
   togglePinAssignment: (id: string) => void;
   isPinned: (id: string) => boolean;
+  completeAssignment: (id: string) => void;
+  uncompleteAssignment: (id: string) => void;
+  toggleCompleteAssignment: (id: string) => void;
+  isCompleted: (id: string) => boolean;
+  setShowCompleted: (show: boolean) => void;
 }
 
 export const useSettings = create<SettingsStore>()(
@@ -37,6 +44,8 @@ export const useSettings = create<SettingsStore>()(
       focusMode: false,
       density: "comfort",
       pinnedAssignments: [],
+      completedAssignments: [],
+      showCompleted: false,
       
       // Setters
       setRefreshInterval: (refreshInterval) => set({ refreshInterval }),
@@ -45,6 +54,7 @@ export const useSettings = create<SettingsStore>()(
       setFocusMode: (focusMode) => set({ focusMode }),
       toggleFocusMode: () => set((state) => ({ focusMode: !state.focusMode })),
       setDensity: (density) => set({ density }),
+      setShowCompleted: (showCompleted) => set({ showCompleted }),
       
       // Pinned assignments
       pinAssignment: (id) => set((state) => ({
@@ -61,6 +71,22 @@ export const useSettings = create<SettingsStore>()(
           : [...state.pinnedAssignments, id]
       })),
       isPinned: (id) => get().pinnedAssignments.includes(id),
+      
+      // Completed assignments
+      completeAssignment: (id) => set((state) => ({
+        completedAssignments: state.completedAssignments.includes(id)
+          ? state.completedAssignments
+          : [...state.completedAssignments, id]
+      })),
+      uncompleteAssignment: (id) => set((state) => ({
+        completedAssignments: state.completedAssignments.filter((i) => i !== id)
+      })),
+      toggleCompleteAssignment: (id) => set((state) => ({
+        completedAssignments: state.completedAssignments.includes(id)
+          ? state.completedAssignments.filter((i) => i !== id)
+          : [...state.completedAssignments, id]
+      })),
+      isCompleted: (id) => get().completedAssignments.includes(id),
     }),
     {
       name: "canvas-pp-settings",

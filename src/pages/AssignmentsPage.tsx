@@ -26,7 +26,7 @@ type DueRange = "today" | "week" | "two_weeks" | "all";
 type SortOption = "due" | "course" | "points";
 
 export default function AssignmentsPage() {
-  const { refreshInterval, showGrades } = useSettings();
+  const { refreshInterval, showGrades, completedAssignments, showCompleted } = useSettings();
   const [searchParams] = useSearchParams();
   
   const [selectedAssignment, setSelectedAssignment] = useState<Assignment | null>(null);
@@ -64,6 +64,11 @@ export default function AssignmentsPage() {
     if (!assignments) return [];
     
     let result = [...assignments];
+
+    // Filter out completed unless showCompleted is true
+    if (!showCompleted) {
+      result = result.filter(a => !completedAssignments.includes(a.id));
+    }
 
     // Search filter
     if (search) {
@@ -123,7 +128,7 @@ export default function AssignmentsPage() {
     }
 
     return result;
-  }, [assignments, search, statusFilter, courseFilter, dueRange, sortBy]);
+  }, [assignments, search, statusFilter, courseFilter, dueRange, sortBy, completedAssignments, showCompleted]);
 
   const handleAssignmentClick = (assignment: Assignment) => {
     setSelectedAssignment(assignment);
