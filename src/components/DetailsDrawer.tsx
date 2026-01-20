@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils";
 import type { Assignment } from "@/types/canvas";
 import { StatusBadge } from "./StatusBadge";
 import { CoursePill } from "./CoursePill";
+import { AISummaryBadge } from "./AISummaryBadge";
 import { Button } from "@/components/ui/button";
 import { useSettings } from "@/hooks/use-settings";
 import { useToastActions } from "@/hooks/use-toast-actions";
@@ -147,13 +148,22 @@ function DetailsContent({
           </div>
         )}
 
-        {/* Description */}
+        {/* AI Summary & Description */}
         {assignment.description && (
-          <div className="pt-4 border-t border-border">
-            <div className="text-xs text-muted-foreground mb-2">Description</div>
-            <p className="text-sm text-muted-foreground leading-relaxed">
-              {assignment.description}
-            </p>
+          <div className="pt-4 border-t border-border space-y-3">
+            {/* AI Summary */}
+            <AISummaryBadge 
+              description={assignment.description} 
+              assignmentName={assignment.name} 
+            />
+            
+            {/* Original Description */}
+            <div>
+              <div className="text-xs text-muted-foreground mb-2">Description</div>
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                {assignment.description}
+              </p>
+            </div>
           </div>
         )}
       </div>
