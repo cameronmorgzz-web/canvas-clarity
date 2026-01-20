@@ -4,7 +4,8 @@ import {
   Home, 
   FileText, 
   Calendar, 
-  BookOpen, 
+  BookOpen,
+  StickyNote,
   Settings, 
   ChevronRight,
   Sparkles,
@@ -27,6 +28,7 @@ const navItems = [
   { path: "/assignments", label: "Assignments", icon: FileText, shortcut: "G A" },
   { path: "/calendar", label: "Calendar", icon: Calendar, shortcut: "G C" },
   { path: "/courses", label: "Courses", icon: BookOpen, shortcut: "G O" },
+  { path: "/notes", label: "Notes", icon: StickyNote, shortcut: "G N" },
   { path: "/settings", label: "Settings", icon: Settings, shortcut: "G S" },
 ];
 

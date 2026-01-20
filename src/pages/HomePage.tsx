@@ -1,7 +1,7 @@
 import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
-import { Megaphone, Pin, Sparkles, GraduationCap, Calendar, StickyNote } from "lucide-react";
+import { Megaphone, Pin, Sparkles, GraduationCap, Calendar } from "lucide-react";
 import { fetchUpcoming, fetchAnnouncements } from "@/lib/api";
 import { useSettings } from "@/hooks/use-settings";
 import type { Assignment } from "@/types/canvas";
@@ -15,8 +15,6 @@ import { SkeletonList, SkeletonWeekStrip } from "@/components/SkeletonCard";
 import { CollapsibleSection } from "@/components/CollapsibleSection";
 import { FocusSummaryCard } from "@/components/FocusSummaryCard";
 import { TimetableCard } from "@/components/TimetableCard";
-import { NotesWall } from "@/components/NotesWall";
-import { cn } from "@/lib/utils";
 
 type FilterType = "all" | "overdue" | "today" | "week" | "done";
 
@@ -235,15 +233,6 @@ export default function HomePage() {
           )}
         </>
       )}
-
-      {/* Notes Wall Section */}
-      <CollapsibleSection
-        title="Notes Wall"
-        icon={<StickyNote className="w-3.5 h-3.5 text-primary" />}
-        defaultOpen={false}
-      >
-        <NotesWall />
-      </CollapsibleSection>
 
       <DetailsDrawer assignment={selectedAssignment} open={drawerOpen} onClose={() => setDrawerOpen(false)} />
     </div>
