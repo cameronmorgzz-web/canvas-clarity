@@ -9,6 +9,7 @@ import HomePage from "./pages/HomePage";
 import AssignmentsPage from "./pages/AssignmentsPage";
 import CalendarPage from "./pages/CalendarPage";
 import CoursesPage from "./pages/CoursesPage";
+import NotesPage from "./pages/NotesPage";
 import SettingsPage from "./pages/SettingsPage";
 import NotFound from "./pages/NotFound";
 
@@ -36,6 +37,7 @@ const App = () => (
               <Route path="/calendar" element={<CalendarPage />} />
               <Route path="/courses" element={<CoursesPage />} />
               <Route path="/courses/:id" element={<CoursesPage />} />
+              <Route path="/notes" element={<NotesPage />} />
               <Route path="/settings" element={<SettingsPage />} />
             </Route>
             <Route path="*" element={<NotFound />} />
